@@ -8,7 +8,7 @@
 #include <time.h> // needed for emit prologue
 
 //Constructor
-Compiler::Compiler(char **argv)
+Compiler::Compiler(char **argv) // GTG
 {
 	sourceFile.open(argv[1]);
 	listingFile.open(argv[2]);
@@ -16,31 +16,35 @@ Compiler::Compiler(char **argv)
 }
 
 //Destructor
-Compiler::~Compiler() // destructor
+Compiler::~Compiler() // destructor GTG
 {
 	sourceFile.close();
 	listingFile.close();
 	objectFile.close();
 }
 
-void Compiler::createListingHeader()
+void Compiler::createListingHeader() // GTG
 {
 	time_t now = time (NULL);
-	listingFile << "STAGE0:  " << "Joshua Strickland\t" << ctime(&now) << endl;
+	listingFile << "STAGE0:  " << "Joshua Strickland & Gavin Whitson\t" << ctime(&now) << endl;
 	listingFile << "LINE NO." << setw(30) << "SOURCE STATEMENT" << endl;
 }
 
-void Compiler::parser()
+void Compiler::parser() // GTG
 {
 	lineNo++;
 	listingFile << endl << right << setw(5) << lineNo << '|';
-	//nextChar();
+	nextChar();
+	
 	if (nextToken() != "program")
+	{
+		cout << "here1";
 		processError("keyword \"program\" expected");
+	}
 	prog();
 }
 
-void Compiler::createListingTrailer()
+void Compiler::createListingTrailer() // GTG
 {
 	listingFile << "COMPILATION TERMINATED\t" << errorCount << " ERRORS ENCOUNTERED";
 }
@@ -53,7 +57,7 @@ void Compiler::processError(string err) // GTG
 }
 
 //PRODUCTIONS
-void Compiler::prog()	// token should be "program"
+void Compiler::prog()	// token should be "program" GTG
 {
 	if (token != "program")
 		processError("keyword \"program\" expected");
@@ -121,9 +125,7 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 		processError("non-keyword identifier expected");
 	x = token;
 	if (nextToken() != "=")
-	{
 		processError("\"=\" expected");
-	}
 	y = nextToken();
 	if (y != "+" && y != "-" && y != "not" && !isNonKeyId(y) && !isBoolean(y) && !isInteger(y))
 		processError("token to right of \"=\" illegal");
@@ -150,13 +152,11 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 	x = nextToken();
 	if (x != "begin" && x != "var" && !isNonKeyId(x)) 
 		processError("non-keyword identifier, \"begin\", or \"var\" expected");
-	if(token == "var")
-		vars();
 	if (isNonKeyId(x))
 		constStmts();
 }
 
-void Compiler::varStmts()
+void Compiler::varStmts() // GTG
 {
 	string x,y,z;
 	if (!isNonKeyId(token))
@@ -220,9 +220,7 @@ bool Compiler::isNonKeyId(string s) const // determines if s is a non_key_id
 
 		}
 		else
-		{
        		return false;
-		}
 	}
 	if (s[s.length() - 1] == '_')
 		return false;
@@ -238,9 +236,7 @@ bool Compiler::isInteger(string s) const // GTG
 			
         } 
 	  else
-		{
        	    return false;
-       	}
 	}
 	return true;
 }
@@ -314,17 +310,23 @@ string Compiler::whichValue(string name) // tells which value a name has
 	return symbolTable.at(name).getValue();
 }
 
-void Compiler::code(string op, string operand1, string operand2)
+void Compiler::code(string op, string operand1, string operand2) // GTG
 {
+	if (op == "program")
+		emitPrologue(operand1);
+	else if (op == "end")
+		emitEpilogue();
+	else
+		processError("compiler error since function code should not be called with illegal arguments");
 }
 
 //EMIT ROUTINES
-void Compiler::emit(string label, string instruction, string operands, string comment)
+void Compiler::emit(string label, string instruction, string operands, string comment) //GTG
 {
 	objectFile << left  << setw(8) << label << setw(8) << instruction << setw(24) << operands << comment << endl;
 }
 
-void Compiler::emitPrologue(string progName, string)
+void Compiler::emitPrologue(string progName, string) //GTG
 {
 	time_t t = time(NULL);
 	
@@ -336,8 +338,10 @@ void Compiler::emitPrologue(string progName, string)
 	emit("global", "_start", "", fProgName);
 }
 
-void Compiler::emitEpilogue(string, string)
+void Compiler::emitEpilogue(string operand1, string operand2) // GTG
 {
+	emit("","Exit", "{0}");
+	emitStorage();
 }
 
 void Compiler::emitStorage()
@@ -436,11 +440,11 @@ string Compiler::nextToken()
 	return token;
 }
 //OTHER ROUTINES                          
-string Compiler::genInternalName(storeTypes stype) const
+string Compiler::genInternalName(storeTypes stype) const //GTG
 {
-	int count_bool = 0;
-	int count_ints = 0;
-	int count_prog = 0;
+	static int count_bool = 0;
+	static int count_ints = 0;
+	static int count_prog = 0;
 	
 	string name = "";
 	
@@ -463,10 +467,3 @@ string Compiler::genInternalName(storeTypes stype) const
 	}
 	return name;
 }
-
-//void Compiler::processError(string err)
-//{
-//	listingFile << err << endl;
-//	exit(0);
-//}
-//
