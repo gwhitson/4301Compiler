@@ -4,6 +4,8 @@
 
 #include <stage0.h>
 #include <cctype> //needed for lexical functions
+#include <iomanip> // needed for emit functions (setw())
+#include <time.h> // needed for emit prologue
 
 //Constructor
 Compiler::Compiler(char **argv)
@@ -30,24 +32,31 @@ void Compiler::createListingTrailer()
 void Compiler::prog()           // stage 0, production 1
 {
 }
+
 void Compiler::progStmt()       // stage 0, production 2
 {
 }
+
 void Compiler::consts()         // stage 0, production 3
 {
 }
+
 void Compiler::vars()           // stage 0, production 4
 {
 }
+
 void Compiler::beginEndStmt()   // stage 0, production 5
 {
 }
+
 void Compiler::constStmts()     // stage 0, production 6
 {
 }
+
 void Compiler::varStmts()       // stage 0, production 7
 {
 }
+
 string Compiler::ids()          // stage 0, production 8
 {
 	return "temp";
@@ -59,22 +68,27 @@ bool Compiler::isKeyword(string s) const  // determines if s is a keyword
 {
 	return false;
 }
+
 bool Compiler::isSpecialSymbol(char c) const // determines if c is a special symbol
 {
 	return false;
 }
+
 bool Compiler::isNonKeyId(string s) const // determines if s is a non_key_id
 {
 	return false;
 }
+
 bool Compiler::isInteger(string s) const  // determines if s is an integer
 {
 	return false;
 }
+
 bool Compiler::isBoolean(string s) const  // determines if s is a boolean
 {
 	return false;
 }
+
 bool Compiler::isLiteral(string s) const  // determines if s is a literal
 {
 	return false;
@@ -83,32 +97,31 @@ bool Compiler::isLiteral(string s) const  // determines if s is a literal
 //ACTION ROUTINES
 void Compiler::insert(string externalName, storeTypes inType, modes inMode, string inValue, allocation inAlloc, int inUnits)
 {
-	while (externalName != ":")                                                   // this is the result left in test from our current else                                                      // break ID from list of names
-	{                                                                     //                                                                                                            // break ID from list of names
-		uint index = externalName.find(',');                                      // finds a comma, it can either be a proper index, some big ass number, or 0. Get rid of the two outliers     // break ID from list of names
-		string name;
-		//cout << index << endl; //debug                                  //                                               ^                                                            // break ID from list of names
-																		  //                                               |                                                            // break ID from list of names
-		if (index != 0 && index <= externalName.length())                         // this gets rid of those two outliers mentioned |                                                            // break ID from list of names
-		{                                                                 //                                                                                                            // break ID from list of names
-			name = externalName.substr(0, index);                      		  // breaks the first identifier from the list                                                                  // break ID from list of names
-			externalName = externalName.substr(index + 1, externalName.length());                 // returns the rest of the list, missing the first element and its following comma                            // break ID from list of names
-																		  //                                                                                                            // break ID from list of names
-			///*debug*/cout << name1 << endl;                               //                                                                                                            // break ID from list of names
-		}                                                                 //                                                                                                            // break ID from list of names
-		else                                                              // this is when there is no remaining comma in the list of names, essentially one left and a colon            // break ID from list of names
-		{                                                                 //                                                                                                            // break ID from list of names
-			index = externalName.find(':');                                       // find the colon, (last character so really could use length but this is a little safer ig)                  // break ID from list of names
-			name = externalName.substr(0, index);                         		  // breaks the last name from the string                                                                       // break ID from list of names
-			externalName = externalName.substr(index, externalName.length());                     // makes test ":" so that it breaks the while loop                                                            // break ID from list of names
-			///*debug*/cout << name1 << endl;                               //                                                                                                            // break ID from list of names
-		}                                                                 //                                                                                                            // break ID from list of names
+	while (externalName != ":")                                           			// this is the result left in test from our current else                                                  // break ID from ExtNnames
+	{                                                                     			//                                                                                                        // break ID from ExtNnames
+		uint index = externalName.find(',');                              			// finds a comma, it can either be a proper index, some big ass number, or 0. Get rid of the two outliers // break ID from ExtNnames
+		string name;			                                                                                                                                                                               
+		//cout << index << endl; //debug                                  			//                                               ^                                                        // break ID from ExtNnames
+																					//                                               |                                                        // break ID from ExtNnames
+		if (index != 0 && index <= externalName.length())                 			// this gets rid of those two outliers mentioned |                                                        // break ID from ExtNnames
+		{                                                                 			//                                                                                                        // break ID from ExtNnames
+			name = externalName.substr(0, index);                      	  			// breaks the first identifier from the list                                                              // break ID from ExtNnames
+			externalName = externalName.substr(index + 1, externalName.length());   // returns the rest of the list, missing the first element and its following comma                        // break ID from ExtNnames
+																					//                                                                                                        // break ID from ExtNnames
+			///*debug*/cout << name1 << endl;                            		    //                                                                                                        // break ID from ExtNnames
+		}                                                              			    //                                                                                                        // break ID from ExtNnames
+		else                                                            		    // this is when there is no remaining comma in the list of names, essentially one left and a colon        // break ID from ExtNnames
+		{                                                               		    //                                                                                                        // break ID from ExtNnames
+			index = externalName.find(':');                                         // find the colon, (last character so really could use length but this is a little safer ig)              // break ID from ExtNnames
+			name = externalName.substr(0, index);                         		    // breaks the last name from the string                                                                   // break ID from ExtNnames
+			externalName = externalName.substr(index, externalName.length());       // makes test ":" so that it breaks the while loop                                                        // break ID from ExtNnames
+		}                                                                 
 		/*debug*/cout << name << endl; 
 		//name contains the name we just broke from the list, here we need to check if its uppercase or lowercase. uppercase represents the internal name and we can create the map entry with the name as is
 		// if the name is lowercase, that means it comes from pascal source code (external name) and needs to have the internal name generated
 		if (name[0] < 'Z')
 		{
-			symbolTable.insert(pair<string, SymbolTableEntry>(name, SymbolTableEntry(name, inType, inMode, "0", inAlloc, inUnits)));
+			symbolTable.insert(pair<string, SymbolTableEntry>(name, SymbolTableEntry(name, inType, inMode, inValue, inAlloc, inUnits)));
 		}
 		else
 		{
@@ -117,14 +130,20 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		
 	}
 }
+
 storeTypes Compiler::whichType(string name) // tells which data type a name has
 {
-	return BOOLEAN;
+	//storeTypes type/* = BOOLEAN*/;
+	return symbolTable.at(name).getDataType();
+	
+	//return type;
 }
+
 string Compiler::whichValue(string name) // tells which value a name has
 {
-	return "temp";
+	return symbolTable.at(name).getValue();
 }
+
 void Compiler::code(string op, string operand1, string operand2)
 {
 }
@@ -132,13 +151,25 @@ void Compiler::code(string op, string operand1, string operand2)
 //EMIT ROUTINES
 void Compiler::emit(string label, string instruction, string operands, string comment)
 {
+	objectFile << left  << setw(8) << label << setw(8) << instruction << setw(24) << operands << comment << endl;
 }
+
 void Compiler::emitPrologue(string progName, string)
 {
+	time_t t = time(NULL);
+	
+	objectFile << ";Gavin Whitson - Joshua Stickland\t\t" << asctime(localtime(&t));
+	objectFile << "%INCLUDE \"Along32.inc\"" << endl;
+	objectFile << "%INCLUDE \"Macros_Along.inc\"" << endl;
+	string fProgName = "; program" + progName; 
+	emit("\nSECTION", ".text", "", "");
+	emit("global", "_start", "", fProgName);
 }
+
 void Compiler::emitEpilogue(string, string)
 {
 }
+
 void Compiler::emitStorage()
 {
 }
