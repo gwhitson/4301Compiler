@@ -326,7 +326,7 @@ void Compiler::emit(string label, string instruction, string operands, string co
 	objectFile << left  << setw(8) << label << setw(8) << instruction << setw(24) << operands << comment << endl;
 }
 
-void Compiler::emitPrologue(string progName, string) //GTG
+void Compiler::emitPrologue(string progName, string) // GTG
 {
 	time_t t = time(NULL);
 	
@@ -349,96 +349,110 @@ void Compiler::emitStorage()
 }
 
 //LEXICAL ROUTINES
-char Compiler::nextChar()
+char Compiler::nextChar()  //GTG
 {
-	//ifstream file(sourceFile); // is this necessary? i think the constructor opens all needed files
-	char ch = sourceFile.get(); // in final compiler, will probably have to remove the char as ch is declared as a char in private data
-	if (ch == -1) // file.get picks up chars that dont really exist, return them as essentially (char)-1 --- may need to be less than 0?? 
+	if (sourceFile.eof())
 	{
-		ch = END_OF_FILE;
+		ch = sourceFile.eof();
 	}
-	listingFile << ch; // may need to change some for new lines?
-	
-	//cout << ch << endl;
+	else
+	{
+		ch = sourceFile.get();
+	}
+	if (ch == '\n')
+	{
+		lineNo++;
+		listingFile << endl << right << setw(5) << lineNo << "| ";
+		ch = sourceFile.get();
+	}
+	else 
+	{
+		listingFile << ch;
+	}
 	return ch;
 }
 
 
-string Compiler::nextToken()
-{
+string Compiler::nextToken() // GTG
+{	
+	token = "";
+	string com;
 	while (token == "")
 	{
-		char ch = nextChar();
-		cout << ch << endl;
 		
-		if (ch == '{')
+		if (ch == '{')							// case '{'
 		{
-			while ((ch != END_OF_FILE) && (ch != '}'))
+			com = ch;
+			char x = nextChar();
+		while (x != END_OF_FILE || x != '}')
 			{
-				ch = nextChar();
-				if (ch == END_OF_FILE)
+				if (x == '}')
 				{
-					cout << "fail" << endl;
-				}
-				else if (ch == '}')
-				{
-					cout << "coomment good" << endl;
+					com+=ch;
+					x = nextChar();
 					break;
 				}
+				com+=ch;
+				x = nextChar();
 			}
-			break;
+			if (ch == END_OF_FILE)
+				processError("unexpected end of file");
+			else
+				nextChar();
 		}
-		else if (ch == '}')
-		{
-			processError("\'}\' cannot begin token");
-			break;
-		}
-		else if(isSpecialSymbol(ch))
+		
+		else if (ch == '}')						// case '}'
+			processError("'}' cannot begin token");
+
+		else if (ch == ' ' || ch == '\t')						// case ' '
+			nextChar();
+
+		else if (isSpecialSymbol(ch) == true)	// case isSpecialSymbol
 		{
 			token = ch;
-			ch = nextChar();
+			nextChar();
 		}
-		else if(islower(ch))
+		
+		else if (islower(ch)) 	// case islower
 		{
-			while (((isalnum(ch)) || (ch == '_')) && ch != END_OF_FILE)
-				{
-					token += ch;
-					ch = nextChar();
-				}
-				if (ch == END_OF_FILE)
-				{
-					processError("unexpected end of file");
-					break;
-				}
-			break;
+			token = ch;
+			char x = nextChar();
+			while (((isdigit(x)) || (islower(x)) || x == '_') && x != END_OF_FILE)
+			{
+				token+=x;
+				x = nextChar();
+			}
+			if (ch == END_OF_FILE)
+			{
+				processError("unexpected end of file");
+			}
 		}
-		else if(isdigit(ch))
+		
+		else if (isdigit(ch))	// case isdigit
 		{
-			while ((isdigit(ch)) && ch != END_OF_FILE)
-				{
-					token += ch;
-					ch = nextChar();
-				}
-				if (ch == END_OF_FILE)
-				{
-					processError("unexpected end of file");
-					break;
-				}
-			break;
+			token = ch;
+			char x = nextChar();
+			while ((isdigit(x)) && ch != END_OF_FILE)
+			{
+				token+=x;
+				x = nextChar();
+			}
+			if (ch == END_OF_FILE)
+				processError("unexpected end of file");
 		}
+		
 		else if (ch == END_OF_FILE)
-		{
 			token = ch;
-		}
 		else
-		{
+		{	
+			cout << int(ch);
 			processError("illegal symbol");
-			break;
 		}
 	}
-	cout << token << endl;
+	cout << "token: " << token << endl; // debug
 	return token;
 }
+
 //OTHER ROUTINES                          
 string Compiler::genInternalName(storeTypes stype) const //GTG
 {
