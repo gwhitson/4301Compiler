@@ -1,0 +1,7 @@
+program stage0no007;
+      {illustrate erroneous use of Pascallite features.}
+      {program should end with a period, not a semicolon}
+
+    const help = 32;
+          ram = 3;
+    begin end;         {program ends with a period, not a semicolon.}

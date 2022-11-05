@@ -1,0 +1,8 @@
+
+program stage0no034;
+  { whitespace can precede the program statement }
+  { whitespace can follow end.}
+    begin
+    end.    
+                
+

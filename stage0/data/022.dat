@@ -1,0 +1,11 @@
+program stage0no022;
+		 { remember, all vars and consts max of 15 chars
+		   so trancate at 15, and get multiply defined symbols
+		   }
+    const yes = true; no = false;
+          small = 0; smalleryet = -1;
+   	 var   some : integer;
+          right: boolean;
+          aaaaaaaaaaaaaaaaaaaa1,
+          aaaaaaaaaaaaaaaaaaaa2:integer;
+    begin end.    

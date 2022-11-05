@@ -1,0 +1,9 @@
+program stage0no010;
+    {only one occurrence of 'const' allowed}
+
+   const car = 2;
+   const raid = -34;      {only one occurrence of 'const' allowed.}
+         wrong = 3.5:     {no real numbers in Pascallite}
+         po or = 0;       {no embedded blanks in a token.)
+         s = b;           {referencing an undefined constant}
+   begin begin end; end.  

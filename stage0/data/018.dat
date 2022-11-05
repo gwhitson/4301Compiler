@@ -1,0 +1,33 @@
+program stage0no018;
+         {test a lot of long non_key_ids, should be okay}
+  const  zero = 0;  five{5} = 5;
+  var
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:  integer;
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:  integer;
+ccccccccccccccccccccccccccccccc:  integer;
+ddddddddddddddddddddddddddddddd:  integer;
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:  integer;
+fffffffffffffffffffffffffffffff:  integer;
+ggggggggggggggggggggggggggggggg:  integer;
+hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh:  integer;
+iiiiiiiiiiiiiiiiiiiiiiiiiiiiiii:  integer;
+jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj:  integer;
+kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk:  integer;
+lllllllllllllllllllllllllllllll:  integer;
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm:  integer;
+nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn:  integer;
+ooooooooooooooooooooooooooooooo:  integer;
+ppppppppppppppppppppppppppppppp:  integer;
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq:  integer;
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr:  integer;
+sssssssssssssssssssssssssssssss:  integer;
+ttttttttttttttttttttttttttttttt:  integer;
+uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu:  integer;
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv:  integer;
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww:  integer;
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:  integer;
+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy:  integer;
+zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: integer;       d: 
+ boolean;
+  begin
+end  .

@@ -1,0 +1,11 @@
+program stage0no015;
+{ only whitespace and comments are legal following "end." }
+    const yes = true; no = false;
+          small = 0; smalleryet = -1;
+          big = 1; biggeryet = 2;
+          same = big;
+	 var   some : integer;
+          right: boolean;
+    begin
+    end.    const
+   var

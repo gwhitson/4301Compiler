@@ -1,0 +1,11 @@
+program stage0no009;
+    { { need a literal and '=' for a constant
+  also test two opens and one close}
+
+   const car = 2;
+         silly:boolean    {need a literal and '=' for a constant}
+   const raid -34;        {only one occurrence of 'const' allowed.}
+         wrong = 3.5:     {no real numbers in rascal/0.}
+         po or = 0;       {no embedded blanks in a token.}
+         s = b;           {referencing an undefined constant}
+   begin end.  

@@ -1,0 +1,8 @@
+program stage0no006;
+      {illustrate erroneous use of Pascallite features.}
+      {no lists of constants allowed}
+ 
+    const help = 32;
+
+       s,t = 0;        {no lists of constants allowed.}
+    begin end;         {program ends with a period, not a semicolon.}

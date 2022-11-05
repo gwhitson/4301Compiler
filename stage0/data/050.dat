@@ -1,0 +1,12 @@
+{contributed by Zachary Deere & Ryan Dennis, 29-Oct-2018}
+program    stage0no050;
+     const
+            a = 1;
+            b = a;
+            c = stage0no050; {data type of token on the right-hand side must be INTEGER or BOOLEAN}
+            d = 3;
+     var
+            yes,no,maybe:boolean;
+            smallnum,bignum,biggernum:integer;
+     begin
+     end.

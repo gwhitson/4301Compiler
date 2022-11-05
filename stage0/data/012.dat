@@ -1,0 +1,7 @@
+program stage0no012;
+  {no embedded blanks in a token}
+
+   const car = 2;
+         po or = 0;       {no embedded blanks in a token.}
+         s = b;           {referencing an undefined constant}
+   begin begin end; end.  

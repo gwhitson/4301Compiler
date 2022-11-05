@@ -1,0 +1,8 @@
+program stage0no040
+      {semicolon expected after program name}
+
+   var x: integer; {x may not be redefined}
+       x: integer;   
+                      
+       s,t = 0;        {no lists of constants allowed.}
+    begin end;         {program ends with a period, not a semicolon.}

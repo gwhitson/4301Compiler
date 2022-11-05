@@ -1,0 +1,4 @@
+program stage0no016;
+      { { tests embedded comments should be illegal } }
+    begin
+    end.    

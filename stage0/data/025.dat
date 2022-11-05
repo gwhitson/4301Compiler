@@ -1,0 +1,6 @@
+program stage0no025;
+		 {missing ending bracket
+    const yes = true; no = false;
+         	 var   some : integer;
+         
+    begin end.    

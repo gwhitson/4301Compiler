@@ -1,0 +1,8 @@
+program stage0no004;
+      {x may not be redefined}
+
+   var x: integer; {x may not be redefined}
+       x: integer;   
+                      
+       s,t = 0;        {no lists of constants allowed.}
+    begin end;         {program ends with a period, not a semicolon.}

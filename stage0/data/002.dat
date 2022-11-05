@@ -1,0 +1,12 @@
+program stage0no002;
+      {illustrate erroneous use of Pascallite features:}
+	    {odd vs. even length in comment okay          }
+        {should find z+ as illegal name              }
+
+   var x: integer;     
+       z+:boolean;   {z+ is an illegal name}
+       asis: integr;   {'integer' misspelt}
+   const help = 32     {const section must precede var section.}
+       x = true;       {x may not be redefined.}
+       s,t = 0;        {no lists of constants allowed.}
+   begin end;          {program ends with a period, not a semicolon.}

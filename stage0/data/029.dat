@@ -1,0 +1,7 @@
+program stage0no029;
+		 { comments after "end." are OK }
+    const yes = true; no = false;
+          small = 0; smalleryet ={} -1;
+          big = 1; bigger_yet = 2;
+        var   some : integer;
+    begin   end.    { this is a comment after "end." }

@@ -1,0 +1,8 @@
+program stage0no023;
+		 { No caps for us at all, not even for reserved words}
+    CONST yes = true; no = false;
+          small = 0; smalleryet = -1;
+          big = 1; bigger_yet = 2;
+	 var   some : integer;
+          right: boolean;
+    begin	 end.    

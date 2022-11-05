@@ -1,0 +1,10 @@
+program stage0no017;
+		  {demonstrate erroneous features of Pascallite}
+		  {test reserved word split between two lines
+	 should be error}
+  con
+  st  zero = 0;  five = 5;
+  var a,b,w:  integer;
+      z: integer;
+      d:  boolean;
+  begin end  .

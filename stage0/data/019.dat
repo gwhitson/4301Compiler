@@ -1,0 +1,8 @@
+program stage0no019;
+		 { identifiers should not start with an underscore }
+    const yes = true; no = false;
+          small = 0; smalleryet = -1;
+          big = 1; bigger_yet = 2;
+          _same = big;
+	 var   some_ : integer;
+    begin   end.    

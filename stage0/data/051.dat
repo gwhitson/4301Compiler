@@ -1,0 +1,16 @@
+program    stage0no051;   {here is a comment}
+     const yes=true;no=false;
+           small=0;smalleryet=-1234;
+           big = 1;  biggeryet = +2336;  large = biggeryet;
+           zero = small;
+           minus = smalleryet;
+           maybe = not true;
+           possible = not false;
+           on = yes;
+           off = no;
+           fal_se = maybe;
+           tru_e = possible;
+     var   some,many:integer;
+           right, wrong : boolean;
+     begin
+     end.

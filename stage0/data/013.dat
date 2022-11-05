@@ -1,0 +1,6 @@
+program stage0no013;
+    {referencing an undefined constant}
+
+   const car = 2;
+         s = b;           {referencing an undefined constant}
+   begin begin end; end.  

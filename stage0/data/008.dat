@@ -1,0 +1,5 @@
+program stage0no008;
+	{reserved keyword var misused as nonkey_id}
+
+	const var = 2;   {keyword misused.}
+      begin end.

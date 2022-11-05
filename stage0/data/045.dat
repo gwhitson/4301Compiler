@@ -1,0 +1,4 @@
+program stage0no045;
+  var
+    b, var, c : integer; {non keyword id expected}
+begin end.

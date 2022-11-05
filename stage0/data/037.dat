@@ -1,0 +1,5 @@
+program stage0no037_this_name_is_really_long;
+    const
+      stage0no037_this_name_is_really_long = true;
+    begin
+    end.

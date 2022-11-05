@@ -1,0 +1,11 @@
+program stage0no003;
+      {illustrate erroneous use of Pascallite features.}
+      {tests spelling of integer}
+
+
+   var ram: integer;
+       asis: integr;   {'integer' misspelt}
+    const help = 32    {const section must precede var section.}
+       x = true;       {x may not be redefined.}
+       s,t = 0;        {no lists of constants allowed.}
+    begin end;         {program ends with a period, not a semicolon.}

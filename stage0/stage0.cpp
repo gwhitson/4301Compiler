@@ -34,7 +34,7 @@ void Compiler::parser()
 {
 	lineNo++;
 	listingFile << endl << right << setw(5) << lineNo << '|';
-	nextChar();
+	//nextChar();
 	if (nextToken() != "program")
 		processError("keyword \"program\" expected");
 	prog();
@@ -353,92 +353,88 @@ char Compiler::nextChar()
 	{
 		ch = END_OF_FILE;
 	}
-	listingFile << ch << endl; // may need to change some for new lines?
+	listingFile << ch; // may need to change some for new lines?
 	
+	//cout << ch << endl;
 	return ch;
 }
 
 
 string Compiler::nextToken()
 {
-	string token; // declared in private data, can likely remove this full line
 	while (token == "")
 	{
 		char ch = nextChar();
-		char state;
+		cout << ch << endl;
 		
-		if (islower(ch))
-			state = 'l';
-		else if(isdigit(ch))
-			state = 'd';
-		/*else if (isSpecialSymbol(ch))
-			state = 's';*/
-		else if(ch == (char)-1)
-			state = 'e';
-		else
-			state = ch;
-		
-		switch(state)
+		if (ch == '{')
 		{
-			case '{': // process comments
-				while ((ch != (char)-1/*END_OF_FILE*/) && (ch != '}'))
+			while ((ch != END_OF_FILE) && (ch != '}'))
+			{
+				ch = nextChar();
+				if (ch == END_OF_FILE)
 				{
-					ch = nextChar();
-					//cout << ch;
-					if (ch == (char)-1/*END_OF_FILE*/)
-					{
-						cout << "fail" << endl;
-					}
-					else if (ch == '}')
-					{
-						cout << "coomment good" << endl;
-						break;
-					}
-					
+					cout << "fail" << endl;
 				}
-				break;
-				
-			//case '}': -- still need to write processError("'}' cannot begin token);
-			
-			case ' ': // isSpace()
-				break;
-			
-			//case isSpecialSymbol(): --josh is supposed to write the isSpecialSymbol function as of right now (11/2/22 @ 8:17pm)
-			
-			case 'l': //isLower
-				while (((isalnum(ch)) || (ch == '_')) && ch != (char)-1/*END_OF_FILE*/)
+				else if (ch == '}')
+				{
+					cout << "coomment good" << endl;
+					break;
+				}
+			}
+			break;
+		}
+		else if (ch == '}')
+		{
+			processError("\'}\' cannot begin token");
+			break;
+		}
+		else if(isSpecialSymbol(ch))
+		{
+			token = ch;
+			ch = nextChar();
+		}
+		else if(islower(ch))
+		{
+			while (((isalnum(ch)) || (ch == '_')) && ch != END_OF_FILE)
 				{
 					token += ch;
 					ch = nextChar();
 				}
-				/*if (ch is END_OF_FILE)
+				if (ch == END_OF_FILE)
 				{
-					processError(unexpected end of file)
-				}*/
-				break;
-			
-			case 'd': //isDigit
-				while ((isdigit(ch)) && ch != (char)-1/*END_OF_FILE*/)
+					processError("unexpected end of file");
+					break;
+				}
+			break;
+		}
+		else if(isdigit(ch))
+		{
+			while ((isdigit(ch)) && ch != END_OF_FILE)
 				{
 					token += ch;
 					ch = nextChar();
 				}
-				/*if (ch is END_OF_FILE)
+				if (ch == END_OF_FILE)
 				{
-					processError(unexpected end of file);
-				}*/
-				break;
-			
-			case 'e': //END_OF_FILE
-				token = ch;
-				break;
-			default:
-				break; //processError(illegal symbol);
+					processError("unexpected end of file");
+					break;
+				}
+			break;
+		}
+		else if (ch == END_OF_FILE)
+		{
+			token = ch;
+		}
+		else
+		{
+			processError("illegal symbol");
+			break;
 		}
 	}
+	cout << token << endl;
 	return token;
 }
-
 //OTHER ROUTINES                          
 string Compiler::genInternalName(storeTypes stype) const
 {
@@ -468,8 +464,9 @@ string Compiler::genInternalName(storeTypes stype) const
 	return name;
 }
 
-void Compiler::processError(string err)
-{
-	listingFile << err << endl;
-	exit(0);
-}
+//void Compiler::processError(string err)
+//{
+//	listingFile << err << endl;
+//	exit(0);
+//}
+//

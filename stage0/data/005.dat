@@ -1,0 +1,7 @@
+program stage0no005;
+      {illustrate erroneous use of Pascallite features.}
+      {const must come before var}
+
+		 var y:integer;
+    const       s = 0;    
+    begin end;         {program ends with a period, not a semicolon.}

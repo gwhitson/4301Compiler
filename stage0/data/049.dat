@@ -1,0 +1,10 @@
+{Contributed by James Dixon, 19-Oct-2018}
+program    stage0no049;   {here is a comment with a double__underscore included}{here is a comment}
+     const yes=true;no=false;
+           small=0;smaller_yet=-1;
+           big = 1;  bigger__yet = 2; {error '_' must be followed by a letter or number, as per production 6 in the Pascallite Lexicon}
+		   maybe = not true;
+     var   some,many:integer;
+           right, wrong : boolean;
+     begin
+     end.

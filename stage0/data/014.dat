@@ -1,0 +1,5 @@
+program stage0no014;
+   {   no embedded begin-end statement allowed}
+
+   const car = 2;
+   begin begin end; end.   {this should be illegal}

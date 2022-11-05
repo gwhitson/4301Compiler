@@ -1,0 +1,7 @@
+{contributed by Joel King, 2021-Nov-28}
+program    stage0no052; {tests: const non_key_id = not non_key_id;}
+  const yes=true;no=false;
+    should_be_true = not no;
+    should_be_false = not yes;
+  begin
+  end.
