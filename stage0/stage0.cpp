@@ -248,7 +248,7 @@ bool Compiler::isBoolean(string s) const // GTG
 	return false;
 }
 
-bool Compiler::isLiteral(string s) const //GTG
+bool Compiler::isLiteral(string s) const
 {
 	//cout << "isLiteral name check on string: " << s << endl;
 		if (isInteger(s) || isBoolean(s) || (s.substr(0,3) == "not" && isBoolean(s.substr(3,s.length() - 1))) || (s[0] == '+' && isInteger(s.substr(1,s.length() - 1))) || (s[0] == '-' && isInteger(s.substr(1,s.length() - 1))))
