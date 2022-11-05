@@ -10,88 +10,258 @@
 //Constructor
 Compiler::Compiler(char **argv)
 {
+	sourceFile.open(argv[1]);
+	listingFile.open(argv[2]);
+	objectFile.open(argv[3]);
 }
 
 //Destructor
-Compiler::~Compiler()
+Compiler::~Compiler() // destructor
 {
+	sourceFile.close();
+	listingFile.close();
+	objectFile.close();
 }
 
 void Compiler::createListingHeader()
 {
+	time_t now = time (NULL);
+	listingFile << "STAGE0:  " << "Joshua Strickland\t" << ctime(&now) << endl;
+	listingFile << "LINE NO." << setw(30) << "SOURCE STATEMENT" << endl;
 }
+
 void Compiler::parser()
 {
+	lineNo++;
+	listingFile << endl << right << setw(5) << lineNo << '|';
+	nextChar();
+	if (nextToken() != "program")
+		processError("keyword \"program\" expected");
+	prog();
 }
+
 void Compiler::createListingTrailer()
 {
+	listingFile << "COMPILATION TERMINATED\t" << errorCount << " ERRORS ENCOUNTERED";
 }
 
+void Compiler::processError(string err) // GTG
+{
+	listingFile << endl << "Error: Line " << lineNo << ": " << err;
+	cout << endl << "Error: Line " << lineNo << ": " << err << endl << endl;	// debug
+	exit(0);
+}
 
 //PRODUCTIONS
-void Compiler::prog()           // stage 0, production 1
+void Compiler::prog()	// token should be "program"
 {
+	if (token != "program")
+		processError("keyword \"program\" expected");
+	progStmt();
+	if (token == "const")
+		consts();
+	if (token == "var")
+		vars();
+	if (token != "begin")
+		processError("keyword \"begin\" expected");
+	beginEndStmt();
+	if (token != "$")
+		processError("no text may follow \"end\"");
 }
 
-void Compiler::progStmt()       // stage 0, production 2
+void Compiler::progStmt() //token should be "program" GTG
 {
+	string x;
+	if (token != "program")
+		processError("keyword \"program\" expected");
+	x = nextToken();
+	if (!isNonKeyId(token))
+		processError("program name expected");
+	if (nextToken() != ";")
+		processError("semicolon expected");
+	nextToken();
+	code("program", x);
+	insert(x,PROG_NAME,CONSTANT,x,NO,0);
 }
 
-void Compiler::consts()         // stage 0, production 3
+void Compiler::consts() //token should be "const" GTG
 {
+	if (token != "const")
+		processError("keyword \"const\" expected");
+	if (!isNonKeyId(nextToken()))
+		processError("non-keyword identifier must follow \"const\"");
+	constStmts();
 }
 
-void Compiler::vars()           // stage 0, production 4
+void Compiler::vars() //token should be "var" GTG
 {
+	if (token != "var")
+		processError("keyword \"var\" expected");
+	if (!isNonKeyId(nextToken()))
+		processError("non-keyword identifier must follow \"var\"");
+	varStmts();
 }
 
-void Compiler::beginEndStmt()   // stage 0, production 5
+void Compiler::beginEndStmt() //token should be "begin" GTG
 {
+	if (token != "begin")
+		processError("keyword \"begin\" expected");
+	if (nextToken() != "end")
+		processError("keyword \"end\" expected");
+	if (nextToken() != ".")
+		processError("period expected");
+	nextToken();
+	code("end", ".");
 }
 
-void Compiler::constStmts()     // stage 0, production 6
+void Compiler::constStmts() //token should be NON_KEY_ID GTG
 {
+	string x,y;
+	if (!isNonKeyId(token))
+		processError("non-keyword identifier expected");
+	x = token;
+	if (nextToken() != "=")
+	{
+		processError("\"=\" expected");
+	}
+	y = nextToken();
+	if (y != "+" && y != "-" && y != "not" && !isNonKeyId(y) && !isBoolean(y) && !isInteger(y))
+		processError("token to right of \"=\" illegal");
+	if (y == "+" || y == "-") 
+	{
+		if (!isInteger(nextToken()))
+			processError("integer expected after sign");
+		y = y + token;
+	}
+	if (y == "not")
+	{
+		if (!isBoolean(nextToken())) 
+			processError("boolean expected after “not”");
+		if (token == "true")
+			y = "false";
+		else
+			y = "true";
+	}
+	if (nextToken() != ";")
+		processError("semicolon expected");
+	if (whichType(y) != INTEGER && whichType(y) != BOOLEAN)			
+		processError("data type of token on the right-hand side must be INTEGER or BOOLEAN");
+	insert(x,whichType(y),CONSTANT,whichValue(y),YES,1);
+	x = nextToken();
+	if (x != "begin" && x != "var" && !isNonKeyId(x)) 
+		processError("non-keyword identifier, \"begin\", or \"var\" expected");
+	if(token == "var")
+		vars();
+	if (isNonKeyId(x))
+		constStmts();
 }
 
-void Compiler::varStmts()       // stage 0, production 7
+void Compiler::varStmts()
 {
+	string x,y,z;
+	if (!isNonKeyId(token))
+		processError("non-keyword identifier expected");
+	x = ids();
+	if (token != ":")
+		processError("\":\" expected");
+	z = nextToken();
+	if (z != "integer" && z != "boolean")
+		processError("illegal type follows \":\"");
+	y = token;
+	if (nextToken() != ";")
+		processError("semicolon expected");
+	insert(x,whichType(y),VARIABLE,"",YES,1);
+	z = nextToken();
+	if (!isNonKeyId(z) && z != "begin")
+		processError("non-keyword identifier or \"begin\" expected");
+	if (isNonKeyId(token))
+		varStmts();
 }
 
-string Compiler::ids()          // stage 0, production 8
+string Compiler::ids() //token should be NON_KEY_ID GTG
 {
-	return "temp";
+	string temp,tempString;
+	if (!isNonKeyId(token))
+		processError("non-keyword identifier expected");
+	tempString = token;
+	temp = token;
+	if (nextToken() == ",")
+	{
+		if (!isNonKeyId(nextToken()))
+			processError("non-keyword identifier expected");
+		tempString = temp + "," + ids();
+	}
+	cout << "ids: " << tempString << endl;	//debug
+	return tempString;
 }
 
 
 //HELPER FUNCTIONS
-bool Compiler::isKeyword(string s) const  // determines if s is a keyword
+bool Compiler::isKeyword(string s) const // GTG
 {
+	if (s == "program" || s == "begin" || s == "end" || s == "var" || s == "const" || s == "integer" || s == "boolean" || s == "true" || s == "false" || s == "not")
+		return true;
 	return false;
 }
 
-bool Compiler::isSpecialSymbol(char c) const // determines if c is a special symbol
+bool Compiler::isSpecialSymbol(char c) const// GTG
 {
+	if (c == '=' || c == ':' || c == ',' || c == ';' || c == '.' || c == '+' || c == '-')
+		return true;
 	return false;
 }
 
 bool Compiler::isNonKeyId(string s) const // determines if s is a non_key_id
 {
+	for (unsigned int i = 0; i < s.length(); i++)
+	{
+		if (islower(s[i]) || isdigit(s[i]) || s[i] == '_')
+		{
+
+		}
+		else
+		{
+       		return false;
+		}
+	}
+	if (s[s.length() - 1] == '_')
+		return false;
+	return true;
+}
+
+bool Compiler::isInteger(string s) const // GTG
+{
+	for (unsigned int i = 0; i < s.length(); i++)
+	{
+		if (isdigit(s[i]))
+        {
+			
+        } 
+	  else
+		{
+       	    return false;
+       	}
+	}
+	return true;
+}
+
+bool Compiler::isBoolean(string s) const // GTG
+{
+	if (s == "true" || s == "false")
+		return true;
 	return false;
 }
 
-bool Compiler::isInteger(string s) const  // determines if s is an integer
+bool Compiler::isLiteral(string s) const //GTG
 {
-	return false;
-}
-
-bool Compiler::isBoolean(string s) const  // determines if s is a boolean
-{
-	return false;
-}
-
-bool Compiler::isLiteral(string s) const  // determines if s is a literal
-{
-	return false;
+	//cout << "isLiteral name check on string: " << s << endl;
+		if (isInteger(s) || isBoolean(s) || (s.substr(0,3) == "not" && isBoolean(s.substr(3,s.length() - 1))) || (s[0] == '+' && isInteger(s.substr(1,s.length() - 1))) || (s[0] == '-' && isInteger(s.substr(1,s.length() - 1))))
+		{
+		    
+		}
+		else
+		    return false;
+	return true;
 }
 
 //ACTION ROUTINES
