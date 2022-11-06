@@ -389,7 +389,7 @@ void Compiler::emitPrologue(string progName, string) // GTG
 	objectFile << "%INCLUDE \"Along32.inc\"" << endl;
 	objectFile << "%INCLUDE \"Macros_Along.inc\"" << endl;
 	string fProgName = "; program" + progName; 
-	emit("\nSECTION", ".text", "", "");
+	emit("\nSECTION", " .text", "", "");
 	emit("global", "_start", "", fProgName);
 }
 
@@ -497,7 +497,7 @@ string Compiler::nextToken() // GTG
 		else if (ch == ' ' || ch == '\t')						// case ' '
 			nextChar();
 
-		else if (isSpecialSymbol(ch) == true)	// case isSpecialSymbol
+		else if (isSpecialSymbol(ch))	// case isSpecialSymbol
 		{
 			token = ch;
 			nextChar();
@@ -550,6 +550,8 @@ string Compiler::genInternalName(storeTypes stype) const //GTG
 	static int count_prog = 0;
 	
 	string name = "";
+	
+	//my playground
 	
 	if (stype == BOOLEAN)
 	{
