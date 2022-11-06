@@ -196,7 +196,6 @@ string Compiler::ids() //token should be NON_KEY_ID GTG
 			processError("non-keyword identifier expected");
 		tempString = temp + "," + ids();
 	}
-	cout << "ids: " << tempString << endl;	//debug
 	return tempString;
 }
 
@@ -256,7 +255,6 @@ bool Compiler::isBoolean(string s) const // GTG
 
 bool Compiler::isLiteral(string s) const // GTG
 {
-	//cout << "isLiteral name check on string: " << s << endl;
 		if (isInteger(s) || isBoolean(s) || (s.substr(0,3) == "not" && isBoolean(s.substr(3,s.length() - 1))) || (s[0] == '+' && isInteger(s.substr(1,s.length() - 1))) || (s[0] == '-' && isInteger(s.substr(1,s.length() - 1))))
 		{
 		    
@@ -269,12 +267,11 @@ bool Compiler::isLiteral(string s) const // GTG
 //ACTION ROUTINES
 void Compiler::insert(string externalName, storeTypes inType, modes inMode, string inValue, allocation inAlloc, int inUnits)
 {
-	cout << "externalName = " << externalName << endl;
 	while (externalName.length() > 0)                                           	// this is the result left in test from our current else                                                  // break ID from ExtNnames
 	{                                                                     			//                                                                                                        // break ID from ExtNnames
 		uint index = externalName.find(',');                              			// finds a comma, it can either be a proper index, some big ass number, or 0. Get rid of the two outliers // break ID from ExtNnames
 		string name;			                                                                                                                                                                               
-		//cout << index << endl; //debug                                  			//                                               ^                                                        // break ID from ExtNnames
+																					//                                               ^                                                        // break ID from ExtNnames
 																					//                                               |                                                        // break ID from ExtNnames
 		if (index != 0 && index <= externalName.length())                 			// this gets rid of those two outliers mentioned |                                                        // break ID from ExtNnames
 		{                                                                 			//                                                                                                        // break ID from ExtNnames
@@ -292,8 +289,7 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 				name = name.substr(0,name.length() - 1);
 			}
 			externalName = externalName.substr(index, externalName.length());       // makes test ":" so that it breaks the while loop                                                        // break ID from ExtNnames
-		}                                                                 
-		/*debug*/cout << "insert: " << name << "-" <<  inType << "-" <<  inMode << "-" <<  inValue << "-" <<  inAlloc << "-" << inUnits << endl; 
+		}
 		
 		if (symbolTable.count(name) != 0)
 		{
@@ -323,7 +319,6 @@ storeTypes Compiler::whichType(string name) //tells which data type a name has
 	map<string, SymbolTableEntry>::iterator itr;
 	itr = symbolTable.find(name);
 	storeTypes DT;
-	cout << "WhichType: " << name << endl;
 	
 	if (name == "integer")
 	{
@@ -353,7 +348,6 @@ storeTypes Compiler::whichType(string name) //tells which data type a name has
 			DT = itr->second.getDataType(); // maybe
 		else
 		{
-			cout << "here1";
 			processError("reference to undefined constant");
 		}
 	}
@@ -373,7 +367,6 @@ string Compiler::whichValue(string name) //tells which value a name has
 			value = itr->second.getValue();
 		else
 		{
-			cout << "here2";
 			processError("reference to undefined constant");
 		}
 	return value;
@@ -545,12 +538,10 @@ string Compiler::nextToken() // GTG
 		else if (ch == END_OF_FILE)
 			token = ch;
 		else
-		{	
-			cout << int(ch);
+		{
 			processError("illegal symbol");
 		}
 	}
-	cout << "token: " << token << endl; // debug
 	return token;
 }
 
