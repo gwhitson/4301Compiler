@@ -260,7 +260,8 @@ bool Compiler::isLiteral(string s) const // GTG
 //ACTION ROUTINES
 void Compiler::insert(string externalName, storeTypes inType, modes inMode, string inValue, allocation inAlloc, int inUnits)
 {
-	while (externalName != ":")                                           			// this is the result left in test from our current else                                                  // break ID from ExtNnames
+	cout << "externalName = " << externalName << endl;
+	while (externalName.length() > 0)                                           	// this is the result left in test from our current else                                                  // break ID from ExtNnames
 	{                                                                     			//                                                                                                        // break ID from ExtNnames
 		uint index = externalName.find(',');                              			// finds a comma, it can either be a proper index, some big ass number, or 0. Get rid of the two outliers // break ID from ExtNnames
 		string name;			                                                                                                                                                                               
@@ -275,11 +276,12 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		}                                                              			    //                                                                                                        // break ID from ExtNnames
 		else                                                            		    // this is when there is no remaining comma in the list of names, essentially one left and a colon        // break ID from ExtNnames
 		{                                                               		    //                                                                                                        // break ID from ExtNnames
-			index = externalName.find(':');                                         // find the colon, (last character so really could use length but this is a little safer ig)              // break ID from ExtNnames
+			index = externalName.length();                                          // find the colon, (last character so really could use length but this is a little safer ig)              // break ID from ExtNnames
 			name = externalName.substr(0, index);                         		    // breaks the last name from the string                                                                   // break ID from ExtNnames
 			externalName = externalName.substr(index, externalName.length());       // makes test ":" so that it breaks the while loop                                                        // break ID from ExtNnames
 		}                                                                 
-		/*debug*/cout << name << endl; 
+		/*debug*/cout << "insert: " << name << "-" <<  inType << "-" <<  inMode << "-" <<  inValue << "-" <<  inAlloc << "-" << inUnits << endl; 
+		
 		//name contains the name we just broke from the list, here we need to check if its uppercase or lowercase. uppercase represents the internal name and we can create the map entry with the name as is
 		// if the name is lowercase, that means it comes from pascal source code (external name) and needs to have the internal name generated
 		if (name[0] < 'Z')
