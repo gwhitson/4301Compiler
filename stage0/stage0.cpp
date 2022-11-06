@@ -282,8 +282,8 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		{                                                               		    //                                                                                                        // break ID from ExtNnames
 			index = externalName.length();                                          // find the colon, (last character so really could use length but this is a little safer ig)              // break ID from ExtNnames
 			name = externalName.substr(0, index);                         		    // breaks the last name from the string                                                                   // break ID from ExtNnames
-			uint colon = test.find(':');
-			if (colon > 0 && colon < test.length())
+			uint colon = name.find(':');
+			if (colon > 0 && colon < name.length())
 			{
 				name = name.substr(0,name.length() - 1);
 			}
