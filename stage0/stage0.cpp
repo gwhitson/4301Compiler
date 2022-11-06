@@ -468,13 +468,10 @@ char Compiler::nextChar()  //GTG
 			return ch;
 		}
 		lineNo++;
-		listingFile << endl << right << setw(5) << lineNo << "| ";
+		listingFile << endl << right << setw(5) << lineNo << "|";
 		
 	}
-	else 
-	{
-		listingFile << ch;
-	}
+	listingFile << ch;
 	return ch;
 }
 
