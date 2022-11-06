@@ -295,6 +295,15 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		}                                                                 
 		/*debug*/cout << "insert: " << name << "-" <<  inType << "-" <<  inMode << "-" <<  inValue << "-" <<  inAlloc << "-" << inUnits << endl; 
 		
+		if (symbolTable.count(name) != 0)
+		{
+			processError("multiple name definition");
+		}
+		else if(isKeyword(name))
+		{
+			processError("illegal use of keyword");
+		}
+		
 		//name contains the name we just broke from the list, here we need to check if its uppercase or lowercase. uppercase represents the internal name and we can create the map entry with the name as is
 		// if the name is lowercase, that means it comes from pascal source code (external name) and needs to have the internal name generated
 		if (name[0] < 'Z')
