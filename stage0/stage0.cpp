@@ -144,8 +144,11 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 	}
 	if (nextToken() != ";")
 		processError("semicolon expected");
-	if (whichType(y) != INTEGER && whichType(y) != BOOLEAN)			
+	if (whichType(y) != INTEGER && whichType(y) != BOOLEAN)
+	{		
 		processError("data type of token on the right-hand side must be INTEGER or BOOLEAN");
+	}
+
 	insert(x,whichType(y),CONSTANT,whichValue(y),YES,1);
 	x = nextToken();
 	if (x != "begin" && x != "var" && !isNonKeyId(x)) 
@@ -215,7 +218,8 @@ bool Compiler::isNonKeyId(string s) const // determines if s is a non_key_id
 	{
 		if (islower(s[i]) || isdigit(s[i]) || s[i] == '_')
 		{
-
+			if (isKeyword(s))
+				return false;
 		}
 		else
        		return false;
