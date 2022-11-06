@@ -295,7 +295,7 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		
 	}
 }
-
+/*
 storeTypes Compiler::whichType(string name) // tells which data type a name has
 {
 	//storeTypes type/* = BOOLEAN*/;
@@ -307,6 +307,41 @@ storeTypes Compiler::whichType(string name) // tells which data type a name has
 string Compiler::whichValue(string name) // tells which value a name has
 {
 	return symbolTable.at(name).getValue();
+}
+*/
+storeTypes Compiler::whichType(string name) //tells which data type a name has 
+{
+	map<string, SymbolTableEntry> st;
+	map<string, SymbolTableEntry>::iterator itr;
+	itr = st.find(name);
+	storeTypes DT;
+	if (isLiteral(name))
+		if (isBoolean(name))
+			DT = BOOLEAN;
+		else
+			DT = INTEGER;
+	else
+		if (itr != st.end())
+			DT = itr->second.getDataType(); // maybe
+		else
+			processError("reference to undefined constant");
+	return DT;
+}
+ 
+string Compiler::whichValue(string name) //tells which value a name has 
+{
+	map<string, SymbolTableEntry> st;
+	map<string, SymbolTableEntry>::iterator itr;
+	itr = st.find(name);
+	string value;
+	if (isLiteral(name))
+		value = name;
+	else
+		if (itr != st.end() && itr->second.getValue() != "")         //getInternalName(symbolTable[name]) != NULL && getValue(symbolTable[name]) != NULL)	//name is an identifier and hopefully a constant
+			value = itr->second.getValue();
+		else
+			processError("reference to undefined constant");
+	return value;
 }
 
 void Compiler::code(string op, string operand1, string operand2) // GTG
