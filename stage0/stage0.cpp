@@ -298,9 +298,8 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 
 storeTypes Compiler::whichType(string name) //tells which data type a name has 
 {
-	map<string, SymbolTableEntry> st;
 	map<string, SymbolTableEntry>::iterator itr;
-	itr = st.find(name);
+	itr = symbolTable.find(name);
 	storeTypes DT;
 	if (isLiteral(name))
 		if (isBoolean(name))
@@ -308,7 +307,7 @@ storeTypes Compiler::whichType(string name) //tells which data type a name has
 		else
 			DT = INTEGER;
 	else
-		if (itr != st.end())
+		if (itr != symbolTable.end())
 			DT = itr->second.getDataType(); // maybe
 		else
 		{
@@ -320,14 +319,13 @@ storeTypes Compiler::whichType(string name) //tells which data type a name has
  
 string Compiler::whichValue(string name) //tells which value a name has 
 {
-	map<string, SymbolTableEntry> st;
 	map<string, SymbolTableEntry>::iterator itr;
-	itr = st.find(name);
+	itr = symbolTable.find(name);
 	string value;
 	if (isLiteral(name))
 		value = name;
 	else
-		if (itr != st.end() && itr->second.getValue() != "")         //getInternalName(symbolTable[name]) != NULL && getValue(symbolTable[name]) != NULL)	//name is an identifier and hopefully a constant
+		if (itr != symbolTable.end() && itr->second.getValue() != "")         //getInternalName(symbolTable[name]) != NULL && getValue(symbolTable[name]) != NULL)	//name is an identifier and hopefully a constant
 			value = itr->second.getValue();
 		else
 		{
