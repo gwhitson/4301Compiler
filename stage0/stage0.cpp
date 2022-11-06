@@ -2,6 +2,7 @@
 //CS 4301
 //Stage 0
 
+
 #include <stage0.h>
 #include <cctype> //needed for lexical functions
 #include <iomanip> // needed for emit functions (setw())
@@ -271,8 +272,7 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		{                                                                 			//                                                                                                        // break ID from ExtNnames
 			name = externalName.substr(0, index);                      	  			// breaks the first identifier from the list                                                              // break ID from ExtNnames
 			externalName = externalName.substr(index + 1, externalName.length());   // returns the rest of the list, missing the first element and its following comma                        // break ID from ExtNnames
-																					//                                                                                                        // break ID from ExtNnames
-			///*debug*/cout << name1 << endl;                            		    //                                                                                                        // break ID from ExtNnames
+																					//                                                                                                        // break ID from ExtNnames                          		    //                                                                                                        // break ID from ExtNnames
 		}                                                              			    //                                                                                                        // break ID from ExtNnames
 		else                                                            		    // this is when there is no remaining comma in the list of names, essentially one left and a colon        // break ID from ExtNnames
 		{                                                               		    //                                                                                                        // break ID from ExtNnames
@@ -295,20 +295,7 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		
 	}
 }
-/*
-storeTypes Compiler::whichType(string name) // tells which data type a name has
-{
-	//storeTypes type/* = BOOLEAN*/;
-	return symbolTable.at(name).getDataType();
-	
-	//return type;
-}
 
-string Compiler::whichValue(string name) // tells which value a name has
-{
-	return symbolTable.at(name).getValue();
-}
-*/
 storeTypes Compiler::whichType(string name) //tells which data type a name has 
 {
 	map<string, SymbolTableEntry> st;
@@ -324,7 +311,10 @@ storeTypes Compiler::whichType(string name) //tells which data type a name has
 		if (itr != st.end())
 			DT = itr->second.getDataType(); // maybe
 		else
+		{
+			cout << "here1";
 			processError("reference to undefined constant");
+		}
 	return DT;
 }
  
@@ -340,7 +330,10 @@ string Compiler::whichValue(string name) //tells which value a name has
 		if (itr != st.end() && itr->second.getValue() != "")         //getInternalName(symbolTable[name]) != NULL && getValue(symbolTable[name]) != NULL)	//name is an identifier and hopefully a constant
 			value = itr->second.getValue();
 		else
+		{
+			cout << "here2";
 			processError("reference to undefined constant");
+		}
 	return value;
 }
 
@@ -446,7 +439,6 @@ string Compiler::nextToken() // GTG
 			token = ch;
 			nextChar();
 		}
-		
 		else if (islower(ch)) 	// case islower
 		{
 			token = ch;
