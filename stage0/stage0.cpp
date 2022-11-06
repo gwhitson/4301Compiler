@@ -6,7 +6,6 @@
 #include <cctype> //needed for lexical functions
 #include <iomanip> // needed for emit functions (setw())
 #include <time.h> // needed for emit prologue
-#include <vector>  // needed for emit storage -- uses vector to keep list of names to output
 
 //Constructor
 Compiler::Compiler(char **argv) // GTG
@@ -402,29 +401,36 @@ void Compiler::emitEpilogue(string operand1, string operand2) // GTG
 
 void Compiler::emitStorage()
 {
-	vector<string> names;
 	
-	emit("SECTION", ".data", "", "");
+	emit("\nSECTION", " .data", "", "");
 	string itemid;
 	string comment;
-	for (uint i = 0; i < names.size(); i++)
+	string val;
+	map<string, SymbolTableEntry>::iterator itr;
+	
+	for (itr = symbolTable.begin(); itr != symbolTable.end(); itr++)
 	{
-		itemid = names[i];
-		comment = ";" + symbolTable.at(itemid).getInternalName();
-		if (symbolTable.at(itemid).getMode() == CONSTANT)
+		itemid = itr->first;
+		comment = ";" + itemid;
+		if (symbolTable.at(itemid).getMode() == CONSTANT && symbolTable.at(itemid).getDataType() != PROG_NAME)
 		{
-			emit(itemid, "dd", symbolTable.at(itemid).getValue(), comment);
+			val = symbolTable.at(itemid).getValue();
+			if (val == "false")
+				val = "0";
+			else if (val == "true")
+				val = "-1";
+			emit(symbolTable.at(itemid).getInternalName(), "dd", val, comment);
 		}
 	}
 	objectFile << endl;
 	emit("SECTION", ".bss", "", "");
-	for (uint o = 0; o < names.size(); o++)
+	for (itr = symbolTable.begin(); itr != symbolTable.end(); itr++)
 	{
-		itemid = names[o];
-		comment = ";" + symbolTable.at(itemid).getInternalName();
-		if (symbolTable.at(itemid).getMode() == VARIABLE)
+		itemid = itr->first;
+		comment = ";" + itemid;
+		if (symbolTable.at(itemid).getMode() == VARIABLE && symbolTable.at(itemid).getDataType() != PROG_NAME)
 		{
-			emit(itemid, "resd", symbolTable.at(itemid).getValue(), comment);
+			emit(symbolTable.at(itemid).getInternalName(), "resd", "1", comment);
 		}
 	}
 }
@@ -549,17 +555,17 @@ string Compiler::genInternalName(storeTypes stype) const //GTG
 	
 	if (stype == BOOLEAN)
 	{
-		name = "B" + count_bool;
+		name = "B" + to_string(count_bool);
 		count_bool++;
 	}
 	else if (stype == INTEGER)
 	{
-		name = "I" + count_ints;
+		name = "I" + to_string(count_ints);
 		count_ints++;
 	}
 	else if (stype == PROG_NAME)
 	{
-		name = "P" + count_prog;
+		name = "P" + to_string(count_prog);
 		count_prog++;
 	}
 	return name;
