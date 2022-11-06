@@ -435,14 +435,19 @@ char Compiler::nextChar()  //GTG
 	if (sourceFile.eof())
 	{
 		ch = END_OF_FILE;
-		listingFile << endl;
 		return ch;
 	}
 	if (ch == '\n')
 	{
+		ch = sourceFile.get();
+		if (sourceFile.eof())
+		{
+			ch = END_OF_FILE;
+			return ch;
+		}
 		lineNo++;
 		listingFile << endl << right << setw(5) << lineNo << "| ";
-		ch = sourceFile.get();
+		
 	}
 	else 
 	{
