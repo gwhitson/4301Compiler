@@ -301,12 +301,32 @@ storeTypes Compiler::whichType(string name) //tells which data type a name has
 	map<string, SymbolTableEntry>::iterator itr;
 	itr = symbolTable.find(name);
 	storeTypes DT;
+	cout << "WhichType: " << name << endl;
+	
+	if (name == "integer")
+	{
+			DT = INTEGER;
+			return DT;
+	}
+	
+	if (name == "boolean")
+	{
+			DT = BOOLEAN;
+			return DT;
+	}
 	if (isLiteral(name))
 		if (isBoolean(name))
+		{
 			DT = BOOLEAN;
+			return DT;
+		}
 		else
+		{
 			DT = INTEGER;
+			return DT;
+		}
 	else
+	{
 		if (itr != symbolTable.end())
 			DT = itr->second.getDataType(); // maybe
 		else
@@ -314,6 +334,8 @@ storeTypes Compiler::whichType(string name) //tells which data type a name has
 			cout << "here1";
 			processError("reference to undefined constant");
 		}
+	}
+	
 	return DT;
 }
  
