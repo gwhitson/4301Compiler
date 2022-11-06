@@ -2,7 +2,6 @@
 //CS 4301
 //Stage 0
 
-
 #include <stage0.h>
 #include <cctype> //needed for lexical functions
 #include <iomanip> // needed for emit functions (setw())
@@ -373,6 +372,29 @@ void Compiler::emitEpilogue(string operand1, string operand2) // GTG
 
 void Compiler::emitStorage()
 {
+	emit("SECTION", ".data", "", "");
+	string itemid;
+	string comment;
+	for (uint i = 0; i < names.size(); i++)
+	{
+		itemid = names[i];
+		comment = ";" + symbolTable.at(itemid).getInternalName();
+		if (symbolTable.at(itemid).getMode() == CONSTANT)
+		{
+			emit(itemid, "dd", symbolTable.at(itemid).getValue(), comment);
+		}
+	}
+	objectFile << endl;
+	emit("SECTION", ".bss", "", "");
+	for (uint o = 0; o < names.size(); o++)
+	{
+		itemid = names[o];
+		comment = ";" + symbolTable.at(itemid).getInternalName();
+		if (symbolTable.at(itemid).getMode() == VARIABLE)
+		{
+			emit(itemid, "resd", symbolTable.at(itemid).getValue(), comment);
+		}
+	}
 }
 
 //LEXICAL ROUTINES
