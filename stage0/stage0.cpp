@@ -6,6 +6,7 @@
 #include <cctype> //needed for lexical functions
 #include <iomanip> // needed for emit functions (setw())
 #include <time.h> // needed for emit prologue
+#include <vector>  // needed for emit storage -- uses vector to keep list of names to output
 
 //Constructor
 Compiler::Compiler(char **argv) // GTG
@@ -372,6 +373,8 @@ void Compiler::emitEpilogue(string operand1, string operand2) // GTG
 
 void Compiler::emitStorage()
 {
+	vector<string> names;
+	
 	emit("SECTION", ".data", "", "");
 	string itemid;
 	string comment;
