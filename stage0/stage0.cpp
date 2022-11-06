@@ -388,9 +388,10 @@ void Compiler::emitPrologue(string progName, string) // GTG
 	objectFile << ";Gavin Whitson - Joshua Stickland\t\t" << asctime(localtime(&t));
 	objectFile << "%INCLUDE \"Along32.inc\"" << endl;
 	objectFile << "%INCLUDE \"Macros_Along.inc\"" << endl;
-	string fProgName = "; program" + progName; 
+	string fProgName = "; program " + progName; 
 	emit("\nSECTION", " .text", "", "");
 	emit("global", "_start", "", fProgName);
+	emit("\n_start:");
 }
 
 void Compiler::emitEpilogue(string operand1, string operand2) // GTG
@@ -411,7 +412,7 @@ void Compiler::emitStorage()
 	for (itr = symbolTable.begin(); itr != symbolTable.end(); itr++)
 	{
 		itemid = itr->first;
-		comment = ";" + itemid;
+		comment = "; " + itemid;
 		if (symbolTable.at(itemid).getMode() == CONSTANT && symbolTable.at(itemid).getDataType() != PROG_NAME)
 		{
 			val = symbolTable.at(itemid).getValue();
@@ -427,7 +428,7 @@ void Compiler::emitStorage()
 	for (itr = symbolTable.begin(); itr != symbolTable.end(); itr++)
 	{
 		itemid = itr->first;
-		comment = ";" + itemid;
+		comment = "; " + itemid;
 		if (symbolTable.at(itemid).getMode() == VARIABLE && symbolTable.at(itemid).getDataType() != PROG_NAME)
 		{
 			emit(symbolTable.at(itemid).getInternalName(), "resd", "1", comment);
