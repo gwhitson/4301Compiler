@@ -429,7 +429,6 @@ void Compiler::emitStorage()
 	}
 }
 
-//LEXICAL ROUTINES
 char Compiler::nextChar()  //GTG
 {
 	ch = sourceFile.get();
@@ -451,7 +450,6 @@ char Compiler::nextChar()  //GTG
 	}
 	return ch;
 }
-
 
 string Compiler::nextToken() // GTG
 {	
@@ -540,6 +538,8 @@ string Compiler::genInternalName(storeTypes stype) const //GTG
 	static int count_prog = 0;
 	
 	string name = "";
+	
+	//my playground
 	
 	if (stype == BOOLEAN)
 	{
