@@ -432,13 +432,12 @@ void Compiler::emitStorage()
 //LEXICAL ROUTINES
 char Compiler::nextChar()  //GTG
 {
+	ch = sourceFile.get();
 	if (sourceFile.eof())
 	{
-		ch = sourceFile.eof();
-	}
-	else
-	{
-		ch = sourceFile.get();
+		ch = END_OF_FILE;
+		listingFile << endl;
+		return ch;
 	}
 	if (ch == '\n')
 	{
