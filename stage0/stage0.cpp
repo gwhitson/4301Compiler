@@ -551,8 +551,6 @@ string Compiler::genInternalName(storeTypes stype) const //GTG
 	
 	string name = "";
 	
-	//my playground
-	
 	if (stype == BOOLEAN)
 	{
 		name = "B" + to_string(count_bool);
