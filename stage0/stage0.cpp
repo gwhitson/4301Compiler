@@ -282,6 +282,11 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		{                                                               		    //                                                                                                        // break ID from ExtNnames
 			index = externalName.length();                                          // find the colon, (last character so really could use length but this is a little safer ig)              // break ID from ExtNnames
 			name = externalName.substr(0, index);                         		    // breaks the last name from the string                                                                   // break ID from ExtNnames
+			uint colon = test.find(':');
+			if (colon > 0 && colon < test.length())
+			{
+				name = name.substr(0,name.length() - 1);
+			}
 			externalName = externalName.substr(index, externalName.length());       // makes test ":" so that it breaks the while loop                                                        // break ID from ExtNnames
 		}                                                                 
 		/*debug*/cout << "insert: " << name << "-" <<  inType << "-" <<  inMode << "-" <<  inValue << "-" <<  inAlloc << "-" << inUnits << endl; 
@@ -536,8 +541,6 @@ string Compiler::genInternalName(storeTypes stype) const //GTG
 	static int count_prog = 0;
 	
 	string name = "";
-	
-	//my playground
 	
 	if (stype == BOOLEAN)
 	{
