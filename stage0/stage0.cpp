@@ -451,7 +451,7 @@ char Compiler::nextChar()  //GTG
 		ch = END_OF_FILE;
 		return ch;
 	}
-	if (ch == '\n')
+	while (ch == '\n')
 	{
 		ch = sourceFile.get();
 		if (sourceFile.eof())
@@ -462,9 +462,9 @@ char Compiler::nextChar()  //GTG
 		}
 		lineNo++;
 		listingFile << endl << right << setw(5) << lineNo << "|";
-		
 	}
-	listingFile << ch;
+
+		listingFile << ch;
 	return ch;
 }
 
