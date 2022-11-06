@@ -37,10 +37,7 @@ void Compiler::parser() // GTG
 	nextChar();
 	
 	if (nextToken() != "program")
-	{
-		cout << "here1";
 		processError("keyword \"program\" expected");
-	}
 	prog();
 }
 
@@ -248,7 +245,7 @@ bool Compiler::isBoolean(string s) const // GTG
 	return false;
 }
 
-bool Compiler::isLiteral(string s) const
+bool Compiler::isLiteral(string s) const // GTG
 {
 	//cout << "isLiteral name check on string: " << s << endl;
 		if (isInteger(s) || isBoolean(s) || (s.substr(0,3) == "not" && isBoolean(s.substr(3,s.length() - 1))) || (s[0] == '+' && isInteger(s.substr(1,s.length() - 1))) || (s[0] == '-' && isInteger(s.substr(1,s.length() - 1))))
