@@ -43,14 +43,19 @@ void Compiler::parser() // GTG
 
 void Compiler::createListingTrailer() // GTG
 {
-	listingFile << "COMPILATION TERMINATED      " << errorCount << " ERRORS ENCOUNTERED" << endl;
+	if (errorCount != 1)
+		listingFile << "COMPILATION TERMINATED      " << errorCount << " ERRORS ENCOUNTERED" << endl;
+	else
+		listingFile << "COMPILATION TERMINATED      " << errorCount << " ERROR ENCOUNTERED" << endl;
+	exit(1);
 }
 
 void Compiler::processError(string err) // GTG
 {
-	listingFile << endl << "Error: Line " << lineNo << ": " << err;
+	listingFile << endl << "Error: Line " << lineNo << ": " << err << endl << endl;
+	errorCount++;
 	cout << endl << "Error: Line " << lineNo << ": " << err << endl << endl;	// debug
-	exit(0);
+	createListingTrailer();
 }
 
 //PRODUCTIONS
