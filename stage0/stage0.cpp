@@ -44,7 +44,7 @@ void Compiler::parser() // GTG
 
 void Compiler::createListingTrailer() // GTG
 {
-	listingFile << "COMPILATION TERMINATED\t" << errorCount << " ERRORS ENCOUNTERED";
+	listingFile << "COMPILATION TERMINATED      " << errorCount << " ERRORS ENCOUNTERED" << endl;
 }
 
 void Compiler::processError(string err) // GTG
@@ -443,6 +443,7 @@ char Compiler::nextChar()  //GTG
 		if (sourceFile.eof())
 		{
 			ch = END_OF_FILE;
+			listingFile << endl << endl;
 			return ch;
 		}
 		lineNo++;
