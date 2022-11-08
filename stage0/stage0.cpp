@@ -127,7 +127,7 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 void Compiler::constStmts() //token should be NON_KEY_ID GTG
 {
 	//cout << "constStmts token - " << token << endl;
-	string x,y;
+	string x,y,z;
 	if (!isNonKeyId(token))
 		processError("non-keyword identifier expected");
 	x = token;
@@ -144,12 +144,17 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 	}
 	if (y == "not")
 	{
-		if (!isBoolean(nextToken())) 
+		z = nextToken();
+		if (!isBoolean(z) && whichType(z) != BOOLEAN)
+		{
 			processError("boolean expected after “not”");
-		if (token == "true")
+		}
+		//cout << "past check     token z = " << z  << "   token y = " << y<< endl;
+		if (token == "true" || whichValue(z) == "true")
 			y = "false";
 		else
 			y = "true";
+		//cout << "past replace value" << endl;
 	}
 	if (nextToken() != ";")
 		processError("semicolon expected");
