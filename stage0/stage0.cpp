@@ -65,7 +65,11 @@ void Compiler::prog()	// token should be "program" GTG
 		processError("keyword \"program\" expected");
 	progStmt();
 	if (token == "const")
+	{
+		cout << "call to consts token = " << token << endl;
 		consts();
+	}
+	cout << "through consts - " << token << endl;
 	if (token == "var")
 		vars();
 	if (token != "begin")
@@ -122,6 +126,7 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 
 void Compiler::constStmts() //token should be NON_KEY_ID GTG
 {
+	cout << "constStmts token - " << token << endl;
 	string x,y;
 	if (!isNonKeyId(token))
 		processError("non-keyword identifier expected");
@@ -222,6 +227,8 @@ bool Compiler::isNonKeyId(string s) const // determines if s is a non_key_id
 		if (islower(s[i]) || isdigit(s[i]) || s[i] == '_')
 		{
 			if (isKeyword(s))
+				return false;
+			if (s[i] == '_' && s[i-1] == '_')
 				return false;
 		}
 		else
@@ -479,7 +486,7 @@ string Compiler::nextToken() // GTG
 		{
 			com = ch;
 			char x = nextChar();
-		while (x != END_OF_FILE || x != '}')
+		while (x != END_OF_FILE && x != '}')
 			{
 				if (x == '}')
 				{
@@ -513,6 +520,9 @@ string Compiler::nextToken() // GTG
 			char x = nextChar();
 			while (((isdigit(x)) || (islower(x)) || x == '_') && x != END_OF_FILE)
 			{
+				//cout << "token in progress -- " << token  << "    x = " << x<< endl;
+				if(isKeyword(token) && isalpha(x))
+					return token;
 				token+=x;
 				x = nextChar();
 			}
@@ -542,9 +552,10 @@ string Compiler::nextToken() // GTG
 			processError("illegal symbol");
 		}
 	}
+	token = token.substr(0,15);
+	cout << "token = " << token << endl;
 	return token;
 }
-
 //OTHER ROUTINES                          
 string Compiler::genInternalName(storeTypes stype) const //GTG
 {
