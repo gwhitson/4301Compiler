@@ -317,7 +317,8 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		{
 			symbolTable.insert(pair<string, SymbolTableEntry>(name, SymbolTableEntry(genInternalName(inType), inType, inMode, inValue, inAlloc, inUnits)));
 		}
-		
+		if (symbolTable.size() > 256)
+			processError("symbolTable overflow");
 	}
 }
 
