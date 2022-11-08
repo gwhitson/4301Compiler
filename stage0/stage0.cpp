@@ -66,10 +66,10 @@ void Compiler::prog()	// token should be "program" GTG
 	progStmt();
 	if (token == "const")
 	{
-		cout << "call to consts token = " << token << endl;
+		//cout << "call to consts token = " << token << endl;
 		consts();
 	}
-	cout << "through consts - " << token << endl;
+	//cout << "through consts - " << token << endl;
 	if (token == "var")
 		vars();
 	if (token != "begin")
@@ -126,7 +126,7 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 
 void Compiler::constStmts() //token should be NON_KEY_ID GTG
 {
-	cout << "constStmts token - " << token << endl;
+	//cout << "constStmts token - " << token << endl;
 	string x,y;
 	if (!isNonKeyId(token))
 		processError("non-keyword identifier expected");
@@ -139,7 +139,7 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 	if (y == "+" || y == "-") 
 	{
 		if (!isInteger(nextToken()))
-			processError("integer expected after sign");
+			processError("digit expected after sign");
 		y = y + token;
 	}
 	if (y == "not")
@@ -553,7 +553,7 @@ string Compiler::nextToken() // GTG
 		}
 	}
 	token = token.substr(0,15);
-	cout << "token = " << token << endl;
+	//cout << "token = " << token << endl;
 	return token;
 }
 //OTHER ROUTINES                          
