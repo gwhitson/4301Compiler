@@ -300,7 +300,7 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		
 		if (symbolTable.count(name) != 0)
 		{
-			processError("multiple name definition");
+			processError("symbol " + name + " is multiply defined");
 		}
 		else if(isKeyword(name))
 		{
