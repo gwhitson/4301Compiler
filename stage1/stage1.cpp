@@ -1,14 +1,17 @@
 //Gavin Whitson & Josh Strickland
 //CS 4301
-//Stage 0
+//Stage 1
 
-#include <stage0.h>
+#define _CRT_SECURE_NO_WARNINGS // visual studio only
+
+#include <stage1.h>
 #include <cctype> //needed for lexical functions
 #include <iomanip> // needed for emit functions (setw())
 #include <time.h> // needed for emit prologue
+#include <stack>
 
 //Constructor
-Compiler::Compiler(char **argv) // GTG
+Compiler::Compiler(char** argv) // GTG
 {
 	sourceFile.open(argv[1]);
 	listingFile.open(argv[2]);
@@ -25,7 +28,7 @@ Compiler::~Compiler() // destructor GTG
 
 void Compiler::createListingHeader() // GTG
 {
-	time_t now = time (NULL);
+	time_t now = time(NULL);
 	listingFile << "STAGE0:  " << "Joshua Strickland & Gavin Whitson\t" << ctime(&now) << endl;
 	listingFile << "LINE NO." << setw(30) << "SOURCE STATEMENT" << endl;
 }
@@ -35,7 +38,7 @@ void Compiler::parser() // GTG
 	lineNo++;
 	listingFile << endl << right << setw(5) << lineNo << '|';
 	nextChar();
-	
+
 	if (nextToken() != "program")
 		processError("keyword \"program\" expected");
 	prog();
@@ -48,14 +51,6 @@ void Compiler::createListingTrailer() // GTG
 	else
 		listingFile << "COMPILATION TERMINATED      " << errorCount << " ERROR ENCOUNTERED" << endl;
 	exit(1);
-}
-
-void Compiler::processError(string err) // GTG
-{
-	listingFile << endl << "Error: Line " << lineNo << ": " << err << endl << endl;
-	errorCount++;
-	cout << endl << "Error: Line " << lineNo << ": " << err << endl << endl;	// debug
-	createListingTrailer();
 }
 
 //PRODUCTIONS
@@ -91,7 +86,7 @@ void Compiler::progStmt() //token should be "program" GTG
 		processError("semicolon expected");
 	nextToken();
 	code("program", x);
-	insert(x,PROG_NAME,CONSTANT,x,NO,0);
+	insert(x, PROG_NAME, CONSTANT, x, NO, 0);
 }
 
 void Compiler::consts() //token should be "const" GTG
@@ -127,7 +122,7 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 void Compiler::constStmts() //token should be NON_KEY_ID GTG
 {
 	//cout << "constStmts token - " << token << endl;
-	string x,y,z;
+	string x, y, z;
 	if (!isNonKeyId(token))
 		processError("non-keyword identifier expected");
 	x = token;
@@ -136,7 +131,7 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 	y = nextToken();
 	if (y != "+" && y != "-" && y != "not" && !isNonKeyId(y) && !isBoolean(y) && !isInteger(y))
 		processError("token to right of \"=\" illegal");
-	if (y == "+" || y == "-") 
+	if (y == "+" || y == "-")
 	{
 		if (!isInteger(nextToken()))
 			processError("digit expected after sign");
@@ -159,13 +154,13 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 	if (nextToken() != ";")
 		processError("semicolon expected");
 	if (whichType(y) != INTEGER && whichType(y) != BOOLEAN)
-	{		
+	{
 		processError("data type of token on the right-hand side must be INTEGER or BOOLEAN");
 	}
 
-	insert(x,whichType(y),CONSTANT,whichValue(y),YES,1);
+	insert(x, whichType(y), CONSTANT, whichValue(y), YES, 1);
 	x = nextToken();
-	if (x != "begin" && x != "var" && !isNonKeyId(x)) 
+	if (x != "begin" && x != "var" && !isNonKeyId(x))
 		processError("non-keyword identifier, \"begin\", or \"var\" expected");
 	if (isNonKeyId(x))
 		constStmts();
@@ -173,7 +168,7 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 
 void Compiler::varStmts() // GTG
 {
-	string x,y,z;
+	string x, y, z;
 	if (!isNonKeyId(token))
 		processError("non-keyword identifier expected");
 	x = ids();
@@ -185,7 +180,7 @@ void Compiler::varStmts() // GTG
 	y = token;
 	if (nextToken() != ";")
 		processError("semicolon expected");
-	insert(x,whichType(y),VARIABLE,"",YES,1);
+	insert(x, whichType(y), VARIABLE, "", YES, 1);
 	z = nextToken();
 	if (!isNonKeyId(z) && z != "begin")
 		processError("non-keyword identifier or \"begin\" expected");
@@ -195,7 +190,7 @@ void Compiler::varStmts() // GTG
 
 string Compiler::ids() //token should be NON_KEY_ID GTG
 {
-	string temp,tempString;
+	string temp, tempString;
 	if (!isNonKeyId(token))
 		processError("non-keyword identifier expected");
 	tempString = token;
@@ -209,18 +204,124 @@ string Compiler::ids() //token should be NON_KEY_ID GTG
 	return tempString;
 }
 
+void Compiler::execStmts()      // stage 1, production 2
+{
+	string x, y, z;																		  //useless rn
+	if (token == "read" || token == "write" || isNonKeyId(token))						  //if its read, write, or a non key ID. go into execStmts, otherwise it should do nothing
+	{																					  //
+		execStmt();																		  //
+		//execStmts();			// make this indirectly recursive from execStmt			  //
+	}																					  //
+
+}
+void Compiler::execStmt()       // stage 1, production 3								  //
+{																						  //
+	if (token == "read")																  //if its  a read go to readStmt
+	{																					  //
+		readStmt();																		  //
+	}																					  //
+	else if (token == "write")															  //if its a write go to writeStmt
+	{																					  //
+		writeStmt();																	  //
+	}																					  //
+	else if (isNonKeyId(token))															  //if its a nonKeyID go to assignment
+	{																					  //
+		assignStmt();																	  //
+	}																					  //
+	else																				  //otherwise if it got here and its none of the above it should not have got here
+		processError("not a valid exec stmt -- exec stmt");
+}
+void Compiler::assignStmt()     // stage 1, production 4								  //
+{																						  //
+	if (isNonKeyId(token))																  //redundant but never hurts, opens possibility to throw special error too
+	{																					  //
+		nextToken();																	  //only if its still good, get next token
+		if (token == ":=")																  //check if its the assignment operator
+		{																				  //
+			nextToken();																  //get next token to send to express
+			express();																	  //goes to express? according to motls book on stage1
+			nextToken();																  //get next token again, this time we want a semicolon
+			if (token != ";")															  //
+				processError("Semicolon expected -- assign stmt");						  //if theres no semicolon it throws an error
+		}																				  //
+	}
+	else()
+		processError("how did you get here? -- assignStmt")
+}
+void Compiler::readStmt()       // stage 1, production 5		 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+{																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+	if (token == "read")										 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+	{															 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+	}															 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+}																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+//void Compiler::readList()      // stage 1, production 6		 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+//{																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+//																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+//}																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
+void Compiler::writeStmt()      // stage 1, production 7
+{
+
+}
+//void Compiler::writeList()      // stage 1, production 8
+//{
+//
+//}
+void Compiler::express()        // stage 1, production 9
+{
+	term();			   // does not feel right...
+					   // does not feel right...
+	nextToken();	   // does not feel right...
+	expresses();		   // does not feel right...
+}
+void Compiler::expresses()      // stage 1, production 10
+{
+
+}
+void Compiler::term()           // stage 1, production 11
+{
+
+}
+void Compiler::terms()          // stage 1, production 12
+{
+
+}
+void Compiler::factor()         // stage 1, production 13
+{
+
+}
+void Compiler::factors()        // stage 1, production 14
+{
+
+}
+void Compiler::part()           // stage 1, production 15
+{
+
+}
+//void Compiler::relOp()           // stage 1, production 16
+//{
+//
+//}
+//void Compiler::addLevelOp()           // stage 1, production 17
+//{
+//
+//}
+//void Compiler::multLevelOp()           // stage 1, production 18
+//{
+//
+//}
 
 //HELPER FUNCTIONS
 bool Compiler::isKeyword(string s) const // GTG
 {
-	if (s == "program" || s == "begin" || s == "end" || s == "var" || s == "const" || s == "integer" || s == "boolean" || s == "true" || s == "false" || s == "not")
+	if (s == "program" || s == "begin" || s == "end" || s == "var" || s == "const" || s == "integer" || s == "boolean" || s == "true" || s == "false" || s == "not" || s == "mod" || s == "div" || s == "and" || s == "or" || s == "read" || s == "write")
 		return true;
 	return false;
 }
 
 bool Compiler::isSpecialSymbol(char c) const// GTG
 {
-	if (c == '=' || c == ':' || c == ',' || c == ';' || c == '.' || c == '+' || c == '-')
+	if (c == '=' || c == ':' || c == ',' || c == ';' || c == '.' || c == '+' || c == '-' //|| c == '-')
 		return true;
 	return false;
 }
@@ -233,11 +334,11 @@ bool Compiler::isNonKeyId(string s) const // determines if s is a non_key_id
 		{
 			if (isKeyword(s))
 				return false;
-			if (s[i] == '_' && s[i-1] == '_')
+			if (s[i] == '_' && s[i - 1] == '_')
 				return false;
 		}
 		else
-       		return false;
+			return false;
 	}
 	if (s[s.length() - 1] == '_')
 		return false;
@@ -249,11 +350,11 @@ bool Compiler::isInteger(string s) const // GTG
 	for (unsigned int i = 0; i < s.length(); i++)
 	{
 		if (isdigit(s[i]))
-        {
-			
-        } 
-	  else
-       	    return false;
+		{
+
+		}
+		else
+			return false;
 	}
 	return true;
 }
@@ -267,12 +368,12 @@ bool Compiler::isBoolean(string s) const // GTG
 
 bool Compiler::isLiteral(string s) const // GTG
 {
-		if (isInteger(s) || isBoolean(s) || (s.substr(0,3) == "not" && isBoolean(s.substr(3,s.length() - 1))) || (s[0] == '+' && isInteger(s.substr(1,s.length() - 1))) || (s[0] == '-' && isInteger(s.substr(1,s.length() - 1))))
-		{
-		    
-		}
-		else
-		    return false;
+	if (isInteger(s) || isBoolean(s) || (s.substr(0, 3) == "not" && isBoolean(s.substr(3, s.length() - 1))) || (s[0] == '+' && isInteger(s.substr(1, s.length() - 1))) || (s[0] == '-' && isInteger(s.substr(1, s.length() - 1))))
+	{
+
+	}
+	else
+		return false;
 	return true;
 }
 
@@ -282,9 +383,9 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 	while (externalName.length() > 0)                                           	// this is the result left in test from our current else                                                  // break ID from ExtNnames
 	{                                                                     			//                                                                                                        // break ID from ExtNnames
 		uint index = externalName.find(',');                              			// finds a comma, it can either be a proper index, some big ass number, or 0. Get rid of the two outliers // break ID from ExtNnames
-		string name;			                                                                                                                                                                               
-																					//                                               ^                                                        // break ID from ExtNnames
-																					//                                               |                                                        // break ID from ExtNnames
+		string name;
+		//                                               ^                                                        // break ID from ExtNnames
+		//                                               |                                                        // break ID from ExtNnames
 		if (index != 0 && index <= externalName.length())                 			// this gets rid of those two outliers mentioned |                                                        // break ID from ExtNnames
 		{                                                                 			//                                                                                                        // break ID from ExtNnames
 			name = externalName.substr(0, index);                      	  			// breaks the first identifier from the list                                                              // break ID from ExtNnames
@@ -298,23 +399,23 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 			uint colon = name.find(':');
 			if (colon > 0 && colon < name.length())
 			{
-				name = name.substr(0,name.length() - 1);
+				name = name.substr(0, name.length() - 1);
 			}
 			externalName = externalName.substr(index, externalName.length());       // makes test ":" so that it breaks the while loop                                                        // break ID from ExtNnames
 		}
-		
+
 		if (symbolTable.count(name) != 0)
 		{
 			processError("symbol " + name + " is multiply defined");
 		}
-		else if(isKeyword(name))
+		else if (isKeyword(name))
 		{
 			processError("illegal use of keyword");
 		}
-		
+
 		//name contains the name we just broke from the list, here we need to check if its uppercase or lowercase. uppercase represents the internal name and we can create the map entry with the name as is
 		// if the name is lowercase, that means it comes from pascal source code (external name) and needs to have the internal name generated
-		if (symbolTable.size() <256)
+		if (symbolTable.size() < 256)
 		{
 			if (name[0] < 'Z')
 			{
@@ -335,17 +436,17 @@ storeTypes Compiler::whichType(string name) //tells which data type a name has
 	map<string, SymbolTableEntry>::iterator itr;
 	itr = symbolTable.find(name);
 	storeTypes DT;
-	
+
 	if (name == "integer")
 	{
-			DT = INTEGER;
-			return DT;
+		DT = INTEGER;
+		return DT;
 	}
-	
+
 	if (name == "boolean")
 	{
-			DT = BOOLEAN;
-			return DT;
+		DT = BOOLEAN;
+		return DT;
 	}
 	if (isLiteral(name))
 		if (isBoolean(name))
@@ -367,10 +468,10 @@ storeTypes Compiler::whichType(string name) //tells which data type a name has
 			processError("reference to undefined constant");
 		}
 	}
-	
+
 	return DT;
 }
- 
+
 string Compiler::whichValue(string name) //tells which value a name has 
 {
 	map<string, SymbolTableEntry>::iterator itr;
@@ -388,30 +489,104 @@ string Compiler::whichValue(string name) //tells which value a name has
 	return value;
 }
 
-void Compiler::code(string op, string operand1, string operand2) // GTG
+void Compiler::code(string op, string operand1, string operand2)
 {
 	if (op == "program")
 		emitPrologue(operand1);
 	else if (op == "end")
 		emitEpilogue();
+	else if (op == "read")
+		emitReadCode(op, operand2);
+	else if (op == "write")
+		emitWriteCode(op, operand2);
+	else if (op == ":=")
+		emitAssignCode(operand1, operand2);
+	else if (op == "+")
+		emitAdditionCode(operand1, operand2);
+	else if (op == "-")
+		emitSubtractionCode(operand1, operand2);
+	else if (op == "*")
+		emitMultiplicationCode(operand1, operand2);
+	else if (op == "div")
+		emitDivisionCode(operand1, operand2);
+	else if (op == "mod")
+		emitModuloCode(operand1, operand2);
+	else if (op == "neg")
+		emitNegationCode(operand1);
+	else if (op == "not")
+		emitNotCode(operand1);
+	else if (op == "and")
+		emitAndCode(operand1, operand2);
+	else if (op == "or")
+		emitOrCode(operand1, operand2);
+	else if (op == "=")
+		emitEqualityCode(operand1, operand2);
+	else if (op == "<>")
+		emitInequalityCode(operand1, operand2);
+	else if (op == "<")
+		emitLessThanCode(operand1, operand2);
+	else if (op == "<=")
+		emitLessThanOrEqualToCode(operand1, operand2);
+	else if (op == ">")
+		emitGreaterThanCode(operand1, operand2);
+	else if (op == ">=")
+		emitGreaterThanOrEqualToCode(operand1, operand2);
 	else
 		processError("compiler error since function code should not be called with illegal arguments");
+}
+
+void Compiler::pushOperator(string op)
+{
+	operatorStk.push(op);
+}
+
+string Compiler::popOperator()
+{
+
+	if (!operatorStk.empty())
+		operatorStk.pop();
+	else
+	{
+		cout << "compiler error; operator stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
+		processError("compiler error; operator stack underflow");
+	}
+}
+
+void Compiler::pushOperand(string operand)
+{
+	itr = symbolTable.find(name);
+	map<string, SymbolTableEntry>::iterator itr;
+	if (name.isLiteral() && itr != symbolTable.end())
+	{
+		//insert();
+	}
+}
+
+string Compiler::popOperand()
+{
+	if (!operandStk.empty())
+		operandStk.pop();
+	else
+	{
+		cout << "compiler error; operand stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
+		processError("compiler error; operand stack underflow");
+	}
 }
 
 //EMIT ROUTINES
 void Compiler::emit(string label, string instruction, string operands, string comment) //GTG
 {
-	objectFile << left  << setw(8) << label << setw(8) << instruction << setw(24) << operands << comment << endl;
+	objectFile << left << setw(8) << label << setw(8) << instruction << setw(24) << operands << comment << endl;
 }
 
 void Compiler::emitPrologue(string progName, string) // GTG
 {
 	time_t t = time(NULL);
-	
+
 	objectFile << ";Gavin Whitson - Joshua Stickland\t\t" << asctime(localtime(&t));
 	objectFile << "%INCLUDE \"Along32.inc\"" << endl;
 	objectFile << "%INCLUDE \"Macros_Along.inc\"" << endl;
-	string fProgName = "; program " + progName; 
+	string fProgName = "; program " + progName;
 	emit("\nSECTION", " .text", "", "");
 	emit("global", "_start", "", fProgName);
 	emit("\n_start:");
@@ -419,19 +594,19 @@ void Compiler::emitPrologue(string progName, string) // GTG
 
 void Compiler::emitEpilogue(string operand1, string operand2) // GTG
 {
-	emit("","Exit", "{0}");
+	emit("", "Exit", "{0}");
 	emitStorage();
 }
 
 void Compiler::emitStorage()
 {
-	
+
 	emit("\nSECTION", " .data", "", "");
 	string itemid;
 	string comment;
 	string val;
 	map<string, SymbolTableEntry>::iterator itr;
-	
+
 	for (itr = symbolTable.begin(); itr != symbolTable.end(); itr++)
 	{
 		itemid = itr->first;
@@ -459,6 +634,80 @@ void Compiler::emitStorage()
 	}
 }
 
+void Compiler::emitReadCode(string operand, string operand2)
+{
+
+}
+void Compiler::emitWriteCode(string operand, string operand2)
+{
+
+}
+void Compiler::emitAssignCode(string operand1, string operand2)         // op2 = op1
+{
+
+}
+void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +  op1
+{
+
+}
+void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -  op1
+{
+
+}
+void Compiler::emitMultiplicationCode(string operand1, string operand2) // op2 *  op1
+{
+
+}
+void Compiler::emitDivisionCode(string operand1, string operand2)       // op2 /  op1
+{
+
+}
+void Compiler::emitModuloCode(string operand1, string operand2)         // op2 %  op1
+{
+
+}
+void Compiler::emitNegationCode(string operand1, string operand2)           // -op1
+{
+
+}
+void Compiler::emitNotCode(string operand1, string operand2)                // !op1
+{
+
+}
+void Compiler::emitAndCode(string operand1, string operand2)            // op2 && op1
+{
+
+}
+void Compiler::emitOrCode(string operand1, string operand2)             // op2 || op1
+{
+
+}
+void Compiler::emitEqualityCode(string operand1, string operand2)       // op2 == op1
+{
+
+}
+void Compiler::emitInequalityCode(string operand1, string operand2)     // op2 != op1
+{
+
+}
+void Compiler::emitLessThanCode(string operand1, string operand2)       // op2 <  op1
+{
+
+}
+void Compiler::emitLessThanOrEqualToCode(string operand1, string operand2) // op2 <= op1
+{
+
+}
+void Compiler::emitGreaterThanCode(string operand1, string operand2)    // op2 >  op1
+{
+
+}
+void Compiler::emitGreaterThanOrEqualToCode(string operand1, string operand2) // op2 >= op1
+{
+
+}
+
+//LEXICAL ROUTINES
 char Compiler::nextChar()  //GTG
 {
 	ch = sourceFile.get();
@@ -480,30 +729,30 @@ char Compiler::nextChar()  //GTG
 		listingFile << endl << right << setw(5) << lineNo << "|";
 	}
 
-		listingFile << ch;
+	listingFile << ch;
 	return ch;
 }
 
 string Compiler::nextToken() // GTG
-{	
+{
 	token = "";
 	string com;
 	while (token == "")
 	{
-		
+
 		if (ch == '{')							// case '{'
 		{
 			com = ch;
 			char x = nextChar();
-		while (x != END_OF_FILE && x != '}')
+			while (x != END_OF_FILE && x != '}')
 			{
 				if (x == '}')
 				{
-					com+=ch;
+					com += ch;
 					x = nextChar();
 					break;
 				}
-				com+=ch;
+				com += ch;
 				x = nextChar();
 			}
 			if (ch == END_OF_FILE)
@@ -511,7 +760,7 @@ string Compiler::nextToken() // GTG
 			else
 				nextChar();
 		}
-		
+
 		else if (ch == '}')						// case '}'
 			processError("'}' cannot begin token");
 
@@ -530,9 +779,9 @@ string Compiler::nextToken() // GTG
 			while (((isdigit(x)) || (islower(x)) || x == '_') && x != END_OF_FILE)
 			{
 				//cout << "token in progress -- " << token  << "    x = " << x<< endl;
-				if(isKeyword(token) && isalpha(x))
+				if (isKeyword(token) && isalpha(x))
 					return token;
-				token+=x;
+				token += x;
 				x = nextChar();
 			}
 			if (ch == END_OF_FILE)
@@ -540,20 +789,20 @@ string Compiler::nextToken() // GTG
 				processError("unexpected end of file");
 			}
 		}
-		
+
 		else if (isdigit(ch))	// case isdigit
 		{
 			token = ch;
 			char x = nextChar();
 			while ((isdigit(x)) && ch != END_OF_FILE)
 			{
-				token+=x;
+				token += x;
 				x = nextChar();
 			}
 			if (ch == END_OF_FILE)
 				processError("unexpected end of file");
 		}
-		
+
 		else if (ch == END_OF_FILE)
 			token = ch;
 		else
@@ -561,7 +810,7 @@ string Compiler::nextToken() // GTG
 			processError("illegal symbol");
 		}
 	}
-	token = token.substr(0,15);
+	token = token.substr(0, 15);
 	//cout << "token = " << token << endl;
 	return token;
 }
@@ -571,11 +820,11 @@ string Compiler::genInternalName(storeTypes stype) const //GTG
 	static int count_bool = 0;
 	static int count_ints = 0;
 	static int count_prog = 0;
-	
+
 	string name = "";
-	
+
 	//my playground
-	
+
 	if (stype == BOOLEAN)
 	{
 		name = "B" + to_string(count_bool);
@@ -592,4 +841,35 @@ string Compiler::genInternalName(storeTypes stype) const //GTG
 		count_prog++;
 	}
 	return name;
+}
+
+void Compiler::processError(string err) // GTG
+{
+	listingFile << endl << "Error: Line " << lineNo << ": " << err << endl << endl;
+	errorCount++;
+	cout << endl << "Error: Line " << lineNo << ": " << err << endl << endl;	// debug
+	createListingTrailer();
+}
+
+void Compiler::freeTemp()
+{
+	currentTempNo--;
+ 	if (currentTempNo < -1)
+ 		processError(compiler error, currentTempNo should be ≥ –1)
+}
+
+string Compiler::getTemp()
+{
+	string temp;
+	currentTempNo++;
+	temp = "T" + currentTempNo;
+	if (currentTempNo > maxTempNo)
+		insert(temp, UNKNOWN, VARIABLE, "", NO, 1);
+	maxTempNo++;
+	return temp;
+}
+
+bool Compiler::isTemporary(string s) const // determines if s represents a temporary
+{
+
 }
