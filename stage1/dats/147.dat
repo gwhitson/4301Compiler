@@ -1,0 +1,11 @@
+program stage1no147;
+const
+  five = 5;
+var
+  a, b, c : integer;
+begin
+  a := five * (3 + 34);
+  b := a + -5 mod a;
+  c := (a + b) - (b - a);
+  write(a, b, c);
+end.

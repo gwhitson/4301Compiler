@@ -1,0 +1,6 @@
+program stage1no109;
+  var  a,b:integer;
+       g:boolean;
+  begin
+    a:= true;   {can't set int to boolean value}
+  end.

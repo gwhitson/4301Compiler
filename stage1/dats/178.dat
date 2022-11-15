@@ -1,0 +1,29 @@
+program stage1no178;
+const w=3;x=true;
+var   d:boolean;
+      a,b:integer;
+begin
+  read(a,b);
+
+  d := -a >= -b;
+  d := -a >= b;
+  d := -a >= +b;
+  d := a >= -b;
+  d := a >= b;
+  d := a >= +b;
+  d := +a >= -b;
+  d := +a >= b;
+  d := +a >= +b;
+
+  d := -4301 >= -4301;
+  d := -4301 >= 4301;
+  d := -4301 >= +4301;
+  d := 4301 >= -4301;
+  d := 4301 >= 4301;
+  d := 4301 >= +4301;
+  d := +4301 >= -4301;
+  d := +4301 >= 4301;
+  d := +4301 >= +4301;
+
+  d := true >= w;  {binary '>=' requires integer operands}
+end.

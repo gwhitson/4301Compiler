@@ -1,0 +1,17 @@
+{contributed by David Wolfe}
+program dwwtest1 {stage1no144;};
+var
+  a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z : integer;
+  sum1, sum2, sum3, sum4, sum5 : integer;
+  aa, bb, cc, dd : boolean;
+begin
+  sum1 := (a+b+((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+((w+x)+(y+z)))))))))))));
+  sum2 := a+b*c+d*e+f*g+h*i+j*k+l*m+n*o+p*q+r*s+t*u+v*w+x*y+z;
+  sum3 := a+b+c+d+e+f+g+h+i+j+k+l+m+n+o+p+q+r+s+t+u+v+w+x+y+z;
+  sum4 := -(-a++b)*+(+c+-d)*-(+e-+f)*+(-g--h);
+  sum5 := -(-(-(-(-(-a)))));
+  aa   := (a=b) or (c<d) or (e<=f) or (g>h) or (i>=j) or (k<>l);
+  bb   := (aa=bb) and (cc<>dd);
+  cc   := not (not aa = not bb) and not (c<d);
+  dd   := not (not (not (not aa)));
+end.

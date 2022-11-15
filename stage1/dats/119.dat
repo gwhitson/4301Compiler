@@ -1,0 +1,18 @@
+program stage1no119;
+        {correct}
+  const  a = true;
+         b = a;
+  var    c,d,e: boolean;
+         f,g,h: integer;
+
+  begin
+    read(f);
+    read(g);
+    read(h);
+    c := f <= g;
+    d := a = b;
+    e := f = h;
+    write(c);
+    write(d);
+    write(e);
+  end.

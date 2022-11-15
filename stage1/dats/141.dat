@@ -1,0 +1,12 @@
+program stage1no141;
+var
+  aaaaaaaaaaaaaaab : integer;
+begin
+  read(aaaaaaaaaaaaaaa);
+  read(aaaaaaaaaaaaaaab);
+  read(aaaaaaaaaaaaaaac);
+  aaaaaaaaaaaaaaa := aaaaaaaaaaaaaaab + aaaaaaaaaaaaaaac;
+  write(aaaaaaaaaaaaaaa);
+  write(aaaaaaaaaaaaaaab);
+  write(aaaaaaaaaaaaaaac);
+end.

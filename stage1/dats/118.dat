@@ -1,0 +1,10 @@
+program stage1no118;
+        {demonstrate incorrect usage of Pascal assignment statements.}
+  const  a = true;
+         b = false;
+  var    c,d,e: boolean;
+         w,z,y,x: integer;
+  begin
+    c := (w=z) and (a <>b);
+    e := w > z and y > x; {operator and requires boolean operands}
+  end .

@@ -1,0 +1,11 @@
+program stage1no138;
+var
+  a, b, c, d : integer;
+  e          : boolean;
+begin
+  read(a, b);
+  c := a - a div b * b;
+  d := a mod b;
+  e := c = d;
+  write(a, b, c, d, e);
+end.

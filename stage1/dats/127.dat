@@ -1,0 +1,5 @@
+program stage1no127;
+  const a = 5;
+begin
+  read(a); {reading in of read-only location 'a'}
+end.

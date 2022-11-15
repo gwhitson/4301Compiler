@@ -1,0 +1,8 @@
+program stage1no149;
+var
+  a, b, c, d, e, f : integer;
+begin
+  read(a, b, c, d, e, f);
+  a := (a + b) + ((c + d) + (e + f));
+  write(a);
+end.

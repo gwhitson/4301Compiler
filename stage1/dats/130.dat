@@ -1,0 +1,7 @@
+program stage1no130;
+const
+  one = 1;
+  two = 2;
+begin
+  write(one + two); {',' or ')' expected after non-keyword identifier}
+end.

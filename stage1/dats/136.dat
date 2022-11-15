@@ -1,0 +1,11 @@
+program stage1no136;
+var
+  a, b : integer;
+begin
+  read(a, b);
+  write(a, b);
+  a := a + b;
+  b := a - b;
+  a := a - b;
+  write(a, b);
+end.

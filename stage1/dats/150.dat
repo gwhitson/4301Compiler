@@ -1,0 +1,15 @@
+program stage1no150;
+const
+  a = true;
+  b = false;
+  c = not false;
+  d = not true;
+  e = 5;
+  f = +5;
+  g = -5;
+  h = g;
+var
+  i : integer;
+begin
+  var := 17; {non_key_id, "read", or "write" expected}
+end.

@@ -1,0 +1,17 @@
+program stage1no172;
+const w=3;x=true;
+var   d:boolean;
+begin
+  d := x or x;
+  d := x or not false;
+  d := not true or x;
+  d := false or false;
+  d := false or true;
+  d := true or false;
+  d := true or true;
+  d := not false or not false;
+  d := not false or not true;
+  d := not true or not false;
+  d := not true or not true;
+  d := not w;  {unary 'not' requires a boolean operand}
+end.

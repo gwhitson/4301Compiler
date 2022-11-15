@@ -1,0 +1,8 @@
+program stage1no124;
+  { requires 1 temporary }
+var    sum,a,b,c,d,e,f,g,h,i,j,k,l,m,n : integer;
+begin
+  read(a,b,c,d,e,f,g,h,i,j,k,l,m,n);
+  sum := (a-(b-(c-(d-(e-(f-(g-(h-(i-(j-(k-(l-(m-n)))))))))))));
+  write(sum);
+end.

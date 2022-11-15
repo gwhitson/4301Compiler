@@ -1,0 +1,14 @@
+program   stage1no107;
+          {demonstrates correct usage of Pascallite features}
+  const zero = 0; five = 5; right=false; t0=45;wrong={x}true;
+  var   a,b,c,
+        d :integer;
+  begin
+    read(a);
+    read(b);
+    read(c);
+    a := a+b+c;
+    d := a*b*c; d := a+b;
+    write(a);
+    write(d);
+  end.

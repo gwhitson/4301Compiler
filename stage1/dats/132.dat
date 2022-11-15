@@ -1,0 +1,11 @@
+program stage1no132;
+var
+  a, b : integer;
+  c    : boolean;
+begin
+  read(a,b);
+  c := a <> b;
+  write(a, b, c);
+  c := a = b;
+  write(a, b, c);
+end.

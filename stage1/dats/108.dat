@@ -1,0 +1,7 @@
+program stage1no108;
+  const w=3;x=true;
+  var   a,b,c,d,e:integer;
+  begin
+    read(a);
+    d := a+x;   {binary '+' requires integer operands}
+  end.

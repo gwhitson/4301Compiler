@@ -1,0 +1,4 @@
+program stage1no129;
+begin
+  write(5); {non-keyword identifier expected}
+end.

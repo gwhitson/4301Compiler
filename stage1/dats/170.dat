@@ -1,0 +1,10 @@
+program stage1no170;
+const w=3;x=true;
+var   a,b,c,d,e:integer;
+begin
+  read(a);
+  d := -5;
+  d := -d;
+  d := -(-(-d));
+  d := -x;   {unary '-' requires an integer operand}
+end.

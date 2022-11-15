@@ -1,0 +1,7 @@
+program stage1no110;
+        {demonstrate incorrect usage of Pascal assignment statements.}
+  const  zero = 0;  five = 5;
+  var    a,b,c:  integer;        w,z: integer;
+  begin
+    a := five * m;    {reference to undefined variable}
+  end .

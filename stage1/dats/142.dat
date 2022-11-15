@@ -1,0 +1,8 @@
+program stage1no142;
+var
+  a, b, c, d, e, f, g : integer;
+begin
+  read(a, b, c, d, e, f);
+  g := a mod (b * (c div (d - (e + f)));
+  write(a, b, c, d, e, f, g);
+end.

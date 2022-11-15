@@ -1,0 +1,11 @@
+program stage1no171;
+const w=3;x=true;
+var   a,b,c:integer;
+      d,e:boolean;
+begin
+  d := not x;
+  d := not true;
+  d := not false;
+  d := not (not (not x));
+  d := not a;   {unary 'not' requires a boolean operand}
+end.

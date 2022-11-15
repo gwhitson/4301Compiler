@@ -1,0 +1,10 @@
+program stage1no120;
+  const  a = true;
+         b = false;
+  var    c,d,e: boolean;
+
+  begin
+    read(d,e);
+    c := (d=e) and (a <>b);
+    write(c);
+end.

@@ -1,0 +1,22 @@
+program stage1no152;
+  { requires 102 temporaries with 101 allocated }
+  var    sum,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v : integer;
+ begin
+  read(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v);
+  sum := (a+b)+
+         ((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+
+         ((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+
+         ((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+
+         ((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+
+         ((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+
+         ((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+
+         ((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+
+         ((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+
+         ((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+
+         ((c+d)+((e+f)+((g+h)+((i+j)+((k+l)+((m+n)+((o+p)+((q+r)+((s+t)+((u+v)+
+         (a+b)
+         ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+         ))))))))))))))))))))))))))))));
+
+  write(sum);
+end.

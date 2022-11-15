@@ -1,0 +1,45 @@
+program stage1no173;
+const w=3;x=true;
+var   d:boolean;
+      a,b:integer;
+begin
+  d := x = x;
+  d := x = not x;
+  d := not x = x;
+  d := not x = not x;
+
+  d := x = not false;
+  d := not true = x;
+  d := false = false;
+  d := false = true;
+  d := true = false;
+  d := true = true;
+  d := not false = not false;
+  d := not false = not true;
+  d := not true = not false;
+  d := not true = not true;
+
+  read(a,b);
+
+  d := -a = -b;
+  d := -a = b;
+  d := -a = +b;
+  d := a = -b;
+  d := a = b;
+  d := a = +b;
+  d := +a = -b;
+  d := +a = b;
+  d := +a = +b;
+
+  d := -4301 = -4301;
+  d := -4301 = 4301;
+  d := -4301 = +4301;
+  d := 4301 = -4301;
+  d := 4301 = 4301;
+  d := 4301 = +4301;
+  d := +4301 = -4301;
+  d := +4301 = 4301;
+  d := +4301 = +4301;
+
+  d := w = x;  {binary '=' requires operands of the same type}
+end.

@@ -1,0 +1,7 @@
+program stage1no168;
+const w=3;x=true;
+var   a,b,c,d,e:integer;
+begin
+  read(a);
+  d := a div x;   {binary 'div' requires integer operands}
+end.

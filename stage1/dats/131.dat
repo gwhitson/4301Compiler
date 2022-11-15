@@ -1,0 +1,17 @@
+program stage1no131;
+const
+  a = true;
+  b = a;
+  c = not a;
+  d = false;
+  e = d;
+  f = not d;
+  g = not true;
+  h = g;
+  i = not g;
+  j = not false;
+  k = j;
+  l = not j;
+begin
+  write(a,b,c,d,e,f,g,h,i,j,k,l);
+end.

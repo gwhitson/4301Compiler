@@ -1,0 +1,10 @@
+program stage1no117;
+        {demonstrate correct usage of Pascal assignment statements.}
+  const  a = true;
+         b = false;
+  var    c,d,e: boolean;
+         w,z,y,x: integer;
+  begin
+    e:= (w<z) and (a or b);
+    d := (z >=3) or (w < 4);
+  end .

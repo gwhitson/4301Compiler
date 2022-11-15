@@ -1,0 +1,16 @@
+program stage1no157;
+const
+  a = true;
+  b = false;
+  c = not false;
+  d = not true;
+  e = 5;
+  f = +5;
+  g = -5;
+  h = g;
+var
+  i, j : integer;
+begin
+  read(i) 
+  ; read(j) {';' expected}
+end.

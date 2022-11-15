@@ -1,0 +1,10 @@
+program stage1no111;
+        {demonstrate incorrect usage of Pascal assignment statements.}
+  const  zero = 0; five = 5;
+  var    a,b,c:  integer;
+         w,z: integer;
+         d,e: boolean;
+  begin
+    zero := five * a;     {identifier to the left of ':=' must be a variable}
+    b:=a +a ;
+  end .

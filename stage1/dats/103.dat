@@ -1,0 +1,9 @@
+program stage1no103;
+     {demonstrate correct usage of Pascallite features.}
+  const zero = 0; five = 5;
+  var a,b,c,z: integer;          d: boolean;
+  begin
+   read(z);
+   d := z > zero;
+   write(z);
+  end .

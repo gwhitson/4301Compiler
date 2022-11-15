@@ -1,0 +1,12 @@
+program stage1no113;
+        {demonstrate incorrect usage of Pascal assignment statements.}
+  const  zero = 0;
+         five = 5;
+  var    a,b,c: integer;
+         w,z: integer;
+         d,e: boolean;
+  begin
+    c := five * a
+    b:=a +a ;         {above statement missing a semicolon}
+    z:=b + -5 mod a;
+  end .

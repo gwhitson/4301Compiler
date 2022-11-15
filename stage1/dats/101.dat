@@ -1,0 +1,15 @@
+program stage1no101;
+{demonstrate correct usage of Pascallite features.}
+const zero = 0; five = 5;
+var a,b : integer;
+    c   : integer;
+begin   
+   read(a);
+   read(b,c);
+   write(a);
+   write(b);
+   a := five * (3 + 34);
+   b := a +a;
+   write(five);
+   write(a, b, c, five, zero);
+end .

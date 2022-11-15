@@ -1,0 +1,17 @@
+program stage1no115;
+        {demonstrate correct usage of Pascal assignment statements.}
+  const  yes = true;
+         no = false;
+  var    a,b,c: boolean;
+         w,z: boolean;
+         d,e: boolean;
+  begin
+    d := yes and no;
+    a := (((yes)));
+    b := yes or no;
+    c := not b;
+    write(d);
+    write(a);
+    write(b);
+    write(c);
+  end .

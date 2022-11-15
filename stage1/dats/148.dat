@@ -1,0 +1,13 @@
+program stage1no148;
+const
+  zero = 0;
+var
+  a, b, c : integer;
+  d, e, f : boolean;
+begin
+  read(a, b, c);
+  d := a = zero;
+  e := b < c;
+  f := a > b;
+  write(a, b, c, d, e, f);
+end.

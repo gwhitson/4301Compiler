@@ -1,0 +1,18 @@
+program stage1no105;
+        {demonstrate correct usage of Pascallite features.}
+  const  zero = 0; five = 5;
+  var    a,b,c: integer; w,z: integer;
+  begin
+  read(a);
+  read(b);
+  read(c);
+  read(z);
+  z := b mod a;
+  w := c * z;
+  a := -z;
+  b := +c;
+  write(z);
+  write(w);
+  write(a);
+  write(b);
+ end .

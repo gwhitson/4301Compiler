@@ -1,0 +1,11 @@
+program stage1no137;
+var
+  a, b, c, d : integer;
+begin
+  read(a, b, c);
+  write(a, b, c);
+  d := a + (b - c);
+  write(d);
+  d := b * b - 4 * a * c;
+  write(d);
+end.

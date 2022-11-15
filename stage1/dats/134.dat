@@ -1,0 +1,12 @@
+program stage1no134;
+var
+  a, b, r : integer;
+begin
+  read(a, b);
+  r := +(a + b);
+  write(a, b, r);
+  r := +a + +b;
+  write(a, b, r);
+  r := +(+a + +5);
+  write(a, b, r);
+end.

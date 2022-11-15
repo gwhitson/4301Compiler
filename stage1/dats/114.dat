@@ -1,0 +1,11 @@
+program stage1no114;
+        {demonstrate incorrect usage of Pascal assignment statements.}
+  const  zero = 0;
+         five = 5;
+  var    a,b,c,z,  d,e: integer;
+  begin
+    d := five * a ;
+    z:=b + + +5 mod a;   {expected '(', integer, or non_key_id}
+      {more explanation: too many +'s. The first + is treated as addition,
+       the second as a unary. The third + is illegal. b + + (+5) is legal}
+  end .

@@ -1,0 +1,14 @@
+program stage1no151;
+  var
+    a, b, c: boolean;
+    d : boolean;
+    e : integer;
+begin
+  b := true;
+  c := false;
+  a := true;
+
+  d := b = c = a;
+  e := +(-(+5));
+  write(e);
+end.

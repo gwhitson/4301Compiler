@@ -1,0 +1,25 @@
+program stage1no163;
+const
+  a = true;
+  b = false;
+  c = not false;
+  d = not true;
+  e = 5;
+  f = +5;
+  g = -5;
+  h = g;
+var
+  i, j : integer;
+  k : boolean;
+begin
+  read(i) 
+  ; read(j);
+  write(i, j);
+  k := not (a = c); {legal}
+  k := not true; {legal}
+  k := not c; {legal}
+  i := +(e + f); {legal}
+  i := +4301; {legal}
+  i := +g; {legal}
+  i := +const; {expected '(', integer, or non_key_id}
+end.

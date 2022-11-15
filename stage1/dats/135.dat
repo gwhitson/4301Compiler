@@ -1,0 +1,14 @@
+program stage1no135;
+var
+  a, b : boolean;
+begin
+  a := true;
+  b := not a;
+  write(a, b);
+  b := not true;
+  write(b);
+  b := not false;
+  write(b);
+  b := not (a = b);
+  write(a,b);
+end.
