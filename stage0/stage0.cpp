@@ -314,15 +314,18 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		
 		//name contains the name we just broke from the list, here we need to check if its uppercase or lowercase. uppercase represents the internal name and we can create the map entry with the name as is
 		// if the name is lowercase, that means it comes from pascal source code (external name) and needs to have the internal name generated
-		if (name[0] < 'Z')
+		if (symbolTable.size() <256)
 		{
-			symbolTable.insert(pair<string, SymbolTableEntry>(name, SymbolTableEntry(name, inType, inMode, inValue, inAlloc, inUnits)));
+			if (name[0] < 'Z')
+			{
+				symbolTable.insert(pair<string, SymbolTableEntry>(name, SymbolTableEntry(name, inType, inMode, inValue, inAlloc, inUnits)));
+			}
+			else
+			{
+				symbolTable.insert(pair<string, SymbolTableEntry>(name, SymbolTableEntry(genInternalName(inType), inType, inMode, inValue, inAlloc, inUnits)));
+			}
 		}
 		else
-		{
-			symbolTable.insert(pair<string, SymbolTableEntry>(name, SymbolTableEntry(genInternalName(inType), inType, inMode, inValue, inAlloc, inUnits)));
-		}
-		if (symbolTable.size() > 256)
 			processError("symbolTable overflow");
 	}
 }
