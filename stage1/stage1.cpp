@@ -245,8 +245,8 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 				processError("Semicolon expected -- assign stmt");						  //if theres no semicolon it throws an error
 		}																				  //
 	}
-	else()
-		processError("how did you get here? -- assignStmt")
+	else
+		processError("how did you get here? -- assignStmt");
 }
 void Compiler::readStmt()       // stage 1, production 5		 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
 {																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
@@ -321,7 +321,7 @@ bool Compiler::isKeyword(string s) const // GTG
 
 bool Compiler::isSpecialSymbol(char c) const// GTG
 {
-	if (c == '=' || c == ':' || c == ',' || c == ';' || c == '.' || c == '+' || c == '-' //|| c == '-')
+	if (c == '=' || c == ':' || c == ',' || c == ';' || c == '.' || c == '+' || c == '-') //|| c == '-')
 		return true;
 	return false;
 }
@@ -554,9 +554,11 @@ string Compiler::popOperator()
 
 void Compiler::pushOperand(string operand)
 {
-	itr = symbolTable.find(name);
+	
 	map<string, SymbolTableEntry>::iterator itr;
-	if (name.isLiteral() && itr != symbolTable.end())
+	string name = operand; // is this supposed to be operand? -gw
+	itr = symbolTable.find(name);
+	if (isLiteral(name) && itr != symbolTable.end())
 	{
 		//insert();
 	}
@@ -855,7 +857,7 @@ void Compiler::freeTemp()
 {
 	currentTempNo--;
  	if (currentTempNo < -1)
- 		processError(compiler error, currentTempNo should be ≥ –1)
+ 		processError("compiler error, currentTempNo should be ≥ –1:");
 }
 
 string Compiler::getTemp()
