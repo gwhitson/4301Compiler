@@ -192,13 +192,13 @@ string Compiler::ids() //token should be NON_KEY_ID GTG
 {
 	string temp, tempString;
 	if (!isNonKeyId(token))
-		processError("non-keyword identifier expected");
+		processError("non-keyword identifier expected -- ids");
 	tempString = token;
 	temp = token;
 	if (nextToken() == ",")
 	{
 		if (!isNonKeyId(nextToken()))
-			processError("non-keyword identifier expected");
+			processError("non-keyword identifier expected -- ids");
 		tempString = temp + "," + ids();
 	}
 	return tempString;
@@ -232,54 +232,65 @@ void Compiler::execStmt()       // stage 1, production 3								  //
 		processError("not a valid exec stmt -- exec stmt");
 }
 void Compiler::assignStmt()     // stage 1, production 4								  //
-{																						  //
-	if (isNonKeyId(token))																  //redundant but never hurts, opens possibility to throw special error too
-	{																					  //
-		nextToken();																	  //only if its still good, get next token
-		if (token == ":=")																  //check if its the assignment operator
-		{																				  //
-			nextToken();																  //get next token to send to express
-			express();																	  //goes to express? according to motls book on stage1
-			nextToken();																  //get next token again, this time we want a semicolon
-			if (token != ";")															  //
-				processError("Semicolon expected -- assign stmt");						  //if theres no semicolon it throws an error
-		}																				  //
-	}
-	else
-		processError("how did you get here? -- assignStmt");
+{																						  //                                                                               // i feel like i need to rewrite this now
+	if (isNonKeyId(token))																  //redundant but never hurts, opens possibility to throw special error too        // i feel like i need to rewrite this now
+	{																					  //                                                                               // i feel like i need to rewrite this now
+		nextToken();																	  //only if its still good, get next token                                         // i feel like i need to rewrite this now
+		if (token == ":=")																  //check if its the assignment operator                                           // i feel like i need to rewrite this now
+		{																				  //                                                                               // i feel like i need to rewrite this now
+			nextToken();																  //get next token to send to express                                              // i feel like i need to rewrite this now
+			express();																	  //goes to express? according to motls book on stage1                             // i feel like i need to rewrite this now
+			nextToken();																  //get next token again, this time we want a semicolon                            // i feel like i need to rewrite this now
+			if (token != ";")															  //                                                                               // i feel like i need to rewrite this now
+				processError("Semicolon expected -- assign stmt");						  //if theres no semicolon it throws an error                                      // i feel like i need to rewrite this now
+		}																				  //                                                                               // i feel like i need to rewrite this now
+	}                                                                                                                                                                      // i feel like i need to rewrite this now
+	else                                                                                                                                                                   // i feel like i need to rewrite this now
+		processError("how did you get here? -- assignStmt");                                                                                                               // i feel like i need to rewrite this now
 }
-void Compiler::readStmt()       // stage 1, production 5		 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-{																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-	if (token == "read")										 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-	{															 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-	}															 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-}																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-//void Compiler::readList()      // stage 1, production 6		 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-//{																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-//																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-//}																 // ask motl, do we add the readList?? not in header and seemed to cause issues addin
-void Compiler::writeStmt()      // stage 1, production 7
+void Compiler::readStmt()       // stage 1, production 5, production 6 (readList) is included in the code for this one
+{														
+	if (token != "read")                                                                  //
+		processError("read expected -- readStmt");                                        //hella redundant
+	nextToken();                                                                          //
+	if (token != "(")                                                                     //should be the start of the ids
+		processError("\'(\' expected -- readStmt");                                       //
+	string tempIds = ids();                                                               //uhhhh were going to need to do something with this but im getting the stucture in now
+																						  //ids seems to stop when nextToken finds something that is not a , after the word; idea is it should be the ) at this point
+	if (token != ")")                                                                     //should be end of the ids part
+		processError("\')\' expected -- readStmt");                                       //
+	nextToken();                                                                          //
+	if (token != ";")                                                                     //semicolon at the end of this part
+		processError("\';\' expected -- readStmt");                                       //
+}
+void Compiler::writeStmt()      // stage 1, production 7, 8's code is included here
 {
-
+	if (token != "write")                                                                
+		processError("write expected -- writeStmt");                                      // these seem the exact same...
+	nextToken();                                                                          // these seem the exact same...
+	if (token != "(")                                                                     // these seem the exact same...
+		processError("\'(\' expected -- writeStmt");                                      // these seem the exact same...
+	string tempIds = ids();                                                               // these seem the exact same...
+																						  // these seem the exact same...
+	if (token != ")")                                                                     // these seem the exact same...
+		processError("\')\' expected -- writeStmt");                                      // these seem the exact same...
+	nextToken();                                                                          // these seem the exact same...
+	if (token != ";")                                                                     // these seem the exact same...
+		processError("\';\' expected -- writeStmt");                                      // these seem the exact same...
 }
-//void Compiler::writeList()      // stage 1, production 8
-//{
-//
-//}
 void Compiler::express()        // stage 1, production 9
-{
-	term();			   // does not feel right...
-					   // does not feel right...
-	nextToken();	   // does not feel right...
-	expresses();		   // does not feel right...
+{                                                                                                                         //these will probably be heavy on the stack shit
+	//takes in some token -- prodcutions calling this should call nextToken before this production                        //these will probably be heavy on the stack shit
+	term();                                                                                                               //these will probably be heavy on the stack shit
 }
 void Compiler::expresses()      // stage 1, production 10
 {
-
+	
 }
 void Compiler::term()           // stage 1, production 11
 {
+	//assuming this also takes in some token grabbed by previous production
+	factor();
 
 }
 void Compiler::terms()          // stage 1, production 12
@@ -288,7 +299,8 @@ void Compiler::terms()          // stage 1, production 12
 }
 void Compiler::factor()         // stage 1, production 13
 {
-
+	//assuming this ALSO takes in some token from a prior production
+	part();
 }
 void Compiler::factors()        // stage 1, production 14
 {
@@ -296,7 +308,86 @@ void Compiler::factors()        // stage 1, production 14
 }
 void Compiler::part()           // stage 1, production 15
 {
-
+	//heres the whole canoli, the bad boy, the meat and potatoes of this bullshit
+	if (token == "not")
+	{
+		nextToken();
+		if (token == "(")
+		{
+			nextToken();
+			express();
+			nextToken();
+			if (token != ")")
+				processError("\')\' expected -- part ugh .. this is the not section");
+		}
+		else if(isBoolean(token))
+		{
+		}
+		else if(isNonKeyId(token))
+		{
+		}
+		else
+			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (not)");
+	}
+	else if (token == "+")
+	{
+		nextToken();
+		if (token == "(")
+		{
+			nextToken();
+			express();
+			nextToken();
+			if (token != ")")
+				processError("\')\' expected -- part ugh .. this is the + section");
+		}
+		else if(isInteger(token))                                                                                                         // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+		{                                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+		}                                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+		else if(isNonKeyId(token))                                                                                                        // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+		{                                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+		}                                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+		else                                                                                                                              // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (+)");               // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+	}                                                                                                                                     // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+	else if (token == "-")                                                                                                                // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+	{                                                                                                                                     // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+		nextToken();                                                                                                                      // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+		if (token == "(")                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+		{                                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+			nextToken();                                                                                                                  // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+			express();                                                                                                                    // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+			nextToken();                                                                                                                  // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+			if (token != ")")                                                                                                             // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+				processError("\')\' expected -- part ugh .. this is the - section");                                                      // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
+		}
+		else if(isInteger(token))
+		{
+		}
+		else if(isNonKeyId(token))
+		{
+		}
+		else
+			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (-)");
+	}
+	else if (token == "(") // another expression
+	{
+		nextToken();
+		express();
+		nextToken();
+		if (token != ")")
+			processError("\')\' expected -- part(expression)");
+	}
+	else if (isInteger(token))
+	{
+	}
+	else if (isBoolean(token))
+	{
+	}
+	else if (isNonKeyId(token))
+	{
+	}
+	else
+		processError("fail in part");
 }
 //void Compiler::relOp()           // stage 1, production 16
 //{
@@ -541,16 +632,17 @@ void Compiler::pushOperator(string op)
 }
 
 string Compiler::popOperator()
-{
-
-	if (!operatorStk.empty())
-		operatorStk.pop();
-	else
-	{
-		cout << "compiler error; operator stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
-		processError("compiler error; operator stack underflow");
+{                                                                                                                 
+																												  // this needs a return -gw
+	if (!operatorStk.empty())                                                                                     
+		operatorStk.pop();                                                                                        
+	else                                                                                                          
+	{                                                                                                             
+		cout << "compiler error; operator stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;     
+		processError("compiler error; operator stack underflow");                                                 
 	}
-}
+	return "temp";	
+}                                                                                                                 
 
 void Compiler::pushOperand(string operand)
 {
@@ -565,7 +657,7 @@ void Compiler::pushOperand(string operand)
 }
 
 string Compiler::popOperand()
-{
+{                                                                                                                 // this also needs one -gw
 	if (!operandStk.empty())
 		operandStk.pop();
 	else
@@ -573,6 +665,7 @@ string Compiler::popOperand()
 		cout << "compiler error; operand stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
 		processError("compiler error; operand stack underflow");
 	}
+	return "temp";
 }
 
 //EMIT ROUTINES
@@ -873,5 +966,5 @@ string Compiler::getTemp()
 
 bool Compiler::isTemporary(string s) const // determines if s represents a temporary
 {
-
+	return true; //temp
 }
