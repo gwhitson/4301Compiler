@@ -668,9 +668,13 @@ void Compiler::pushOperator(string op)
 
 string Compiler::popOperator()
 {                                                                                                                 
-																												  // this needs a return -gw
+	string stackStr;																									  // this needs a return -gw
 	if (!operatorStk.empty())                                                                                     
-		operatorStk.pop();                                                                                        
+	{
+		stackStr = operatorStk.top();
+		operatorStk.pop();
+		return stackStr;
+	}                                                                                       
 	else                                                                                                          
 	{                                                                                                             
 		cout << "compiler error; operator stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;     
@@ -693,8 +697,13 @@ void Compiler::pushOperand(string operand)
 
 string Compiler::popOperand()
 {                                                                                                                 // this also needs one -gw
+	string stackStr;
 	if (!operandStk.empty())
+	{
+		stackStr = operandStk.top();
 		operandStk.pop();
+		return stackStr;
+	}
 	else
 	{
 		cout << "compiler error; operand stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
