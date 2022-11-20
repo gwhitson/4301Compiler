@@ -121,12 +121,12 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 			processError("\"end\" expected -- beginEndStmt");
 		}
 	}
-	
+
 	if (nextToken() != ".")
 		processError("period expected -- beginEndStmt");
 	nextToken();
 	code("end", ".");
-	
+
 	//execStmts();
 	//if (nextToken() != "end")
 	//	processError("keyword \"end\" expected");
@@ -252,21 +252,27 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 {																						  //                                                                               // i feel like i need to rewrite this now
 	if (isNonKeyId(token))																  //redundant but never hurts, opens possibility to throw special error too        // i feel like i need to rewrite this now
 	{																					  //                                                                               // i feel like i need to rewrite this now
+		pushOperand(token);
 		nextToken();																	  //only if its still good, get next token                                         // i feel like i need to rewrite this now
 		if (token == ":=")																  //check if its the assignment operator                                           // i feel like i need to rewrite this now
 		{																				  //                                                                               // i feel like i need to rewrite this now
+			pushOperator(token);
 			nextToken();																  //get next token to send to express                                              // i feel like i need to rewrite this now
 			express();																	  //goes to express? according to motls book on stage1                             // i feel like i need to rewrite this now
 			nextToken();																  //get next token again, this time we want a semicolon                            // i feel like i need to rewrite this now
 			if (token != ";")															  //                                                                               // i feel like i need to rewrite this now
 				processError("Semicolon expected -- assign stmt");						  //if theres no semicolon it throws an error                                      // i feel like i need to rewrite this now
 		}																				  //                                                                               // i feel like i need to rewrite this now
+		string opand1, opand2;
+		opand1 = popOperand();
+		opand2 = popOperand();
+		code(popOperator(), opand2, opand1);
 	}                                                                                                                                                                      // i feel like i need to rewrite this now
 	else                                                                                                                                                                   // i feel like i need to rewrite this now
 		processError("how did you get here? -- assignStmt");                                                                                                               // i feel like i need to rewrite this now
 }
 void Compiler::readStmt()       // stage 1, production 5, production 6 (readList) is included in the code for this one
-{														
+{
 	if (token != "read")                                                                  //
 		processError("read expected -- readStmt");                                        //hella redundant
 	nextToken();                                                                          //
@@ -277,13 +283,14 @@ void Compiler::readStmt()       // stage 1, production 5, production 6 (readList
 																						  //ids seems to stop when nextToken finds something that is not a , after the word; idea is it should be the ) at this point
 	if (token != ")")                                                                     //should be end of the ids part
 		processError("\')\' expected -- readStmt");                                       //
+	code("read", tempIds);
 	nextToken();                                                                          //
 	if (token != ";")                                                                     //semicolon at the end of this part
 		processError("\';\' expected -- readStmt");                                       //
 }
 void Compiler::writeStmt()      // stage 1, production 7, 8's code is included here
 {
-	if (token != "write")                                                                
+	if (token != "write")
 		processError("write expected -- writeStmt");                                      // these seem the exact same...
 	nextToken();                                                                          // these seem the exact same...
 	if (token != "(")                                                                     // these seem the exact same...
@@ -293,6 +300,7 @@ void Compiler::writeStmt()      // stage 1, production 7, 8's code is included h
 																						  // these seem the exact same...
 	if (token != ")")                                                                     // these seem the exact same...
 		processError("\')\' expected -- writeStmt");                                      // these seem the exact same...
+	code("write", tempIds);
 	nextToken();                                                                          // these seem the exact same...
 	if (token != ";")                                                                     // these seem the exact same...
 		processError("\';\' expected -- writeStmt");                                      // these seem the exact same...
@@ -305,10 +313,15 @@ void Compiler::express()        // stage 1, production 9
 }
 void Compiler::expresses()      // stage 1, production 10
 {
-	if (token == "=" || token == "<>" || token == "<=" || token == ">=" || token == "<" || token == ">" )
+	if (token == "=" || token == "<>" || token == "<=" || token == ">=" || token == "<" || token == ">")
 	{
+		string opand1, opand2;
+		pushOperator(token);
 		nextToken();
 		terms();
+		opand1 = popOperand();
+		opand2 = popOperand();
+		code(popOperator(), opand2, opand1);
 		expresses();
 	}
 }
@@ -323,7 +336,14 @@ void Compiler::terms()          // stage 1, production 12
 {
 	if (token == "+" || token == "-" || token == "or")
 	{
+		string opand1, opand2;
+		pushOperator(token);
 		factor();
+
+		opand1 = popOperand();					 // gen format code call
+		opand2 = popOperand();					 // gen format code call
+		code(popOperator(), opand2, opand1);	 // gen format code call
+
 		terms();
 	}
 }
@@ -337,92 +357,113 @@ void Compiler::factors()        // stage 1, production 14
 {
 	if (token == "*" || token == "div" || token == "mod" || token == "and")
 	{
+		string opand1, opand2;
+		pushOperator(token);
 		part();
+
+		opand1 = popOperand();					 // gen format code call
+		opand2 = popOperand();					 // gen format code call
+		code(popOperator(), opand2, opand1);	 // gen format code call
+
 		factors();
 	}
 }
 void Compiler::part()           // stage 1, production 15
 {
-	//heres the whole canoli, the bad boy, the meat and potatoes of this bullshit
-	if (token == "not")
-	{
-		nextToken();
-		if (token == "(")
-		{
-			nextToken();
-			express();
-			nextToken();
-			if (token != ")")
-				processError("\')\' expected -- part ugh .. this is the not section");
-		}
-		else if(isBoolean(token))
-		{
-		}
-		else if(isNonKeyId(token))
-		{
-		}
-		else
-			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (not)");
-	}
-	else if (token == "+")
-	{
-		nextToken();
-		if (token == "(")
-		{
-			nextToken();
-			express();
-			nextToken();
-			if (token != ")")
-				processError("\')\' expected -- part ugh .. this is the + section");
-		}
-		else if(isInteger(token))                                                                                                         // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-		{                                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-		}                                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-		else if(isNonKeyId(token))                                                                                                        // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-		{                                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-		}                                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-		else                                                                                                                              // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (+)");               // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-	}                                                                                                                                     // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-	else if (token == "-")                                                                                                                // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-	{                                                                                                                                     // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-		nextToken();                                                                                                                      // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-		if (token == "(")                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-		{                                                                                                                                 // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-			nextToken();                                                                                                                  // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-			express();                                                                                                                    // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-			nextToken();                                                                                                                  // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-			if (token != ")")                                                                                                             // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-				processError("\')\' expected -- part ugh .. this is the - section");                                                      // all this shit is copy pasted and slightly tweaked, if one thing doesnt work none of them do
-		}
-		else if(isInteger(token))
-		{
-		}
-		else if(isNonKeyId(token))
-		{
-		}
-		else
-			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (-)");
-	}
-	else if (token == "(") // another expression
-	{
-		nextToken();
-		express();
-		nextToken();
-		if (token != ")")
-			processError("\')\' expected -- part(expression)");
-	}
-	else if (isInteger(token))
-	{
-	}
-	else if (isBoolean(token))
-	{
-	}
-	else if (isNonKeyId(token))
-	{
-	}
-	else
-		processError("fail in part");
+	if (token == "not")                                                                                                                            //   NOT SECTION
+	{                                                                                                                                              //
+		nextToken();                                                                                                                               //
+		if (token == "(")                                                                                                                          //
+		{                                                                                                                                          //
+			nextToken();                                                                                                                           //
+			express();                                                                                                                             //
+			nextToken();                                                                                                                           //
+			if (token != ")")                                                                                                                      //
+				processError("\')\' expected -- part ugh .. this is the not section");                                                             //
+			code("not", popOperand());                                                                                                             //
+		}                                                                                                                                          //
+		else if (isBoolean(token))                                                                                                                 //
+		{                                                                                                                                          //
+			if (token == "true")                                                                                                                   //
+				pushOperand("false");                                                                                                              //
+			else                                                                                                                                   //
+				pushOperand("true");                                                                                                               //
+		}                                                                                                                                          //
+		else if (isNonKeyId(token))                                                                                                                //
+		{                                                                                                                                          //
+			if (whichType(token) != BOOLEAN)                                                                                                       //
+			{                                                                                                                                      //
+				processError("symbol of type BOOLEAN expected -- part (not, isNonKeyID)");                                                         //
+			}                                                                                                                                      //
+			code("not", token);                                                                                                                    //
+		}                                                                                                                                          //
+		else                                                                                                                                       //
+			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (not)");                      //
+	}                                                                                                                                              //
+	else if (token == "+")                                                                                                                         //   + SECTION
+	{                                                                                                                                              //
+		nextToken();                                                                                                                               //
+		if (token == "(")                                                                                                                          //
+		{                                                                                                                                          //
+			nextToken();                                                                                                                           //
+			express();                                                                                                                             //
+			nextToken();                                                                                                                           //
+			if (token != ")")                                                                                                                      //
+				processError("\')\' expected -- part ugh .. this is the + section");                                                               //
+		}                                                                                                                                          //
+		else if (isInteger(token))                                                                                                                 //
+		{                                                                                                                                          //
+			pushOperand(token);
+		}                                                                                                                                          //
+		else if (isNonKeyId(token))                                                                                                                //
+		{                                                                                                                                          //
+			pushOperand(token);
+		}                                                                                                                                          //
+		else                                                                                                                                       //
+			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (+)");                        //
+	}                                                                                                                                              //
+	else if (token == "-")                                                                                                                         //   - SECTION
+	{                                                                                                                                              //
+		nextToken();                                                                                                                               //
+		if (token == "(")                                                                                                                          //
+		{                                                                                                                                          //
+			nextToken();                                                                                                                           //
+			express();                                                                                                                             //
+			nextToken();                                                                                                                           //
+			if (token != ")")                                                                                                                      //
+				processError("\')\' expected -- part ugh .. this is the - section");                                                               //
+		}                                                                                                                                          //
+		else if (isInteger(token))                                                                                                                 //
+		{                                                                                                                                          //
+		}                                                                                                                                          //
+		else if (isNonKeyId(token))                                                                                                                //
+		{                                                                                                                                          //
+		}                                                                                                                                          //
+		else                                                                                                                                       //
+			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (-)");                        //
+	}                                                                                                                                              //
+	else if (token == "(") // another expression                                                                                                   //   SECOND EXPRESSION SECTION
+	{                                                                                                                                              //
+		nextToken();                                                                                                                               //
+		express();                                                                                                                                 //
+		nextToken();                                                                                                                               //
+		if (token != ")")                                                                                                                          //
+			processError("\')\' expected -- part(expression)");                                                                                    //
+	}                                                                                                                                              //
+	else if (isInteger(token))                                                                                                                     //  PURE INT SECTION
+	{                                                                                                                                              //
+			pushOperand(token);                                                                                                                    //
+	}                                                                                                                                              //
+	else if (isBoolean(token))                                                                                                                     //  PURE BOOL SECTION
+	{                                                                                                                                              //
+			pushOperand(token);                                                                                                                    //
+	}                                                                                                                                              //
+	else if (isNonKeyId(token))                                                                                                                    //   NON_KEY_ID SECTION
+	{                                                                                                                                              //
+			pushOperand(token);                                                                                                                    //
+	}                                                                                                                                              //
+	else                                                                                                                                           //
+		processError("fail in part");                                                                                                              //
 }
 //void Compiler::relOp()           // stage 1, production 16
 //{
@@ -591,7 +632,7 @@ storeTypes Compiler::whichType(string name) //tells which data type a name has
 			DT = itr->second.getDataType(); // maybe
 		else
 		{
-			processError("reference to undefined constant");
+			processError("reference to undefined symbol -- whichType");
 		}
 	}
 
@@ -610,7 +651,7 @@ string Compiler::whichValue(string name) //tells which value a name has
 			value = itr->second.getValue();
 		else
 		{
-			processError("reference to undefined constant");
+			processError("reference to undefined symbol -- whichValue");
 		}
 	return value;
 }
@@ -667,32 +708,32 @@ void Compiler::pushOperator(string op)
 }
 
 string Compiler::popOperator()
-{                                                                                                                 
+{
 	string stackStr;																									  // this needs a return -gw
-	if (!operatorStk.empty())                                                                                     
+	if (!operatorStk.empty())
 	{
 		stackStr = operatorStk.top();
 		operatorStk.pop();
 		return stackStr;
-	}                                                                                       
-	else                                                                                                          
-	{                                                                                                             
-		cout << "compiler error; operator stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;     
-		processError("compiler error; operator stack underflow");                                                 
 	}
-	return "temp";	
-}                                                                                                                 
+	else
+	{
+		cout << "compiler error; operator stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
+		processError("compiler error; operator stack underflow");
+	}
+	return "temp";
+}
 
 void Compiler::pushOperand(string operand)
 {
-	
 	map<string, SymbolTableEntry>::iterator itr;
-	string name = operand; // is this supposed to be operand? -gw
-	itr = symbolTable.find(name);
-	if (isLiteral(name) && itr != symbolTable.end())
+	itr = symbolTable.find(operand);
+	
+	if (isLiteral(operand) && itr != symbolTable.end())
 	{
-		//insert();
+		//insert(operand, whichType(operand), , whichValue(operand), NO, 0);
 	}
+	operandStk.push(operand);
 }
 
 string Compiler::popOperand()
@@ -783,11 +824,28 @@ void Compiler::emitWriteCode(string operand, string operand2)
 }
 void Compiler::emitAssignCode(string operand1, string operand2)         // op2 = op1
 {
+	//if (whichType(operand1) != whichType(operand2))
+	//	processError("incompatible types");
+	//if (symbolTable.at(operand2).storeTypes() != "VARIABLE")
+	//	processError("symbol on left-hand side of assignment must have a storage mode of VARIABLE");
+	//if (symbolTable.at(operand2).storeTypes() != "VARIABLE")
+	//	processError("symbol on left-hand side of assignment must have a storage mode of VARIABLE");
+	//if (operand1 == operand2)
+	//	return;
+	//if (operand1 != contentsOfAReg)
+	//	emit(" ", "mov", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; load " + symbolTable.at(operand1).externalName() + " in eax");	// mov	eax, [operand1's inName]
 
 }
 void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +  op1
 {
-
+	//if (whichType(operand1) != "integer" || whichType(operand2) != "integer")
+	//	processError("illegal type");
+	////if (if the A Register holds a temp not operand1 nor operand2)
+	//
+	////if (the A register holds a non-temp not operand1 nor operand2 then deassign it)
+	//if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
+	//	emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; AReg = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+	//emit(" ", "add", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; AReg = " + symbolTable.at(operand2).getValue() + " + " + symbolTable.at(operand1).getValue());	// add	eax, [operand1's inName]
 }
 void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -  op1
 {
@@ -951,7 +1009,7 @@ string Compiler::nextToken() // GTG
 		}
 	}
 	token = token.substr(0, 15);
-	cout << "token = " << token  << "    -- nextToken" << endl;
+	cout << "token = " << token << "    -- nextToken" << endl;
 	return token;
 }
 //OTHER ROUTINES                          
@@ -994,8 +1052,8 @@ void Compiler::processError(string err) // GTG
 void Compiler::freeTemp()
 {
 	currentTempNo--;
- 	if (currentTempNo < -1)
- 		processError("compiler error, currentTempNo should be ≥ –1:");
+	if (currentTempNo < -1)
+		processError("compiler error, currentTempNo should be ≥ –1:");
 }
 
 string Compiler::getTemp()
