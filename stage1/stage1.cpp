@@ -57,7 +57,7 @@ void Compiler::createListingTrailer() // GTG
 void Compiler::prog()	// token should be "program" GTG
 {
 	if (token != "program")
-		processError("keyword \"program\" expected");
+		processError("keyword \"program\" expected -- prog");
 	progStmt();
 	if (token == "const")
 	{
@@ -68,22 +68,22 @@ void Compiler::prog()	// token should be "program" GTG
 	if (token == "var")
 		vars();
 	if (token != "begin")
-		processError("keyword \"begin\" expected");
+		processError("keyword \"begin\" expected -- prog");
 	beginEndStmt();
 	if (token != "$")
-		processError("no text may follow \"end\"");
+		processError("no text may follow \"end\" -- prog");
 }
 
 void Compiler::progStmt() //token should be "program" GTG
 {
 	string x;
 	if (token != "program")
-		processError("keyword \"program\" expected");
+		processError("keyword \"program\" expected -- progStmt");
 	x = nextToken();
 	if (!isNonKeyId(token))
-		processError("program name expected");
+		processError("program name expected -- progStmt");
 	if (nextToken() != ";")
-		processError("semicolon expected");
+		processError("semicolon expected -- progStmt");
 	nextToken();
 	code("program", x);
 	insert(x, PROG_NAME, CONSTANT, x, NO, 0);
@@ -92,31 +92,48 @@ void Compiler::progStmt() //token should be "program" GTG
 void Compiler::consts() //token should be "const" GTG
 {
 	if (token != "const")
-		processError("keyword \"const\" expected");
+		processError("keyword \"const\" expected -- consts");
 	if (!isNonKeyId(nextToken()))
-		processError("non-keyword identifier must follow \"const\"");
+		processError("non-keyword identifier must follow \"const\" -- consts");
 	constStmts();
 }
 
 void Compiler::vars() //token should be "var" GTG
 {
 	if (token != "var")
-		processError("keyword \"var\" expected");
+		processError("keyword \"var\" expected -- var");
 	if (!isNonKeyId(nextToken()))
-		processError("non-keyword identifier must follow \"var\"");
+		processError("non-keyword identifier must follow \"var\" -- var");
 	varStmts();
 }
 
 void Compiler::beginEndStmt() //token should be "begin" GTG
 {
 	if (token != "begin")
-		processError("keyword \"begin\" expected");
-	if (nextToken() != "end")
-		processError("keyword \"end\" expected");
+		processError("keyword \"begin\" expected -- beginEndStmt");
+	nextToken();
+	while (token != "end" /*|| token.at(0) != END_OF_FILE || token != "."*/)
+	{
+		execStmts();
+		nextToken();
+		if (token[0] == END_OF_FILE)
+		{
+			processError("\"end\" expected -- beginEndStmt");
+		}
+	}
+	
 	if (nextToken() != ".")
-		processError("period expected");
+		processError("period expected -- beginEndStmt");
 	nextToken();
 	code("end", ".");
+	
+	//execStmts();
+	//if (nextToken() != "end")
+	//	processError("keyword \"end\" expected");
+	//if (nextToken() != ".")
+	//	processError("period expected -- beginEndStmt");
+	//nextToken();
+	//code("end", ".");
 }
 
 void Compiler::constStmts() //token should be NON_KEY_ID GTG
@@ -124,17 +141,17 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 	//cout << "constStmts token - " << token << endl;
 	string x, y, z;
 	if (!isNonKeyId(token))
-		processError("non-keyword identifier expected");
+		processError("non-keyword identifier expected -- constStmts");
 	x = token;
 	if (nextToken() != "=")
 		processError("\"=\" expected");
 	y = nextToken();
 	if (y != "+" && y != "-" && y != "not" && !isNonKeyId(y) && !isBoolean(y) && !isInteger(y))
-		processError("token to right of \"=\" illegal");
+		processError("token to right of \"=\" illegal -- constStmts");
 	if (y == "+" || y == "-")
 	{
 		if (!isInteger(nextToken()))
-			processError("digit expected after sign");
+			processError("digit expected after sign -- constStmts");
 		y = y + token;
 	}
 	if (y == "not")
@@ -142,7 +159,7 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 		z = nextToken();
 		if (!isBoolean(z) && whichType(z) != BOOLEAN)
 		{
-			processError("boolean expected after “not”");
+			processError("boolean expected after “not” -- constStmts");
 		}
 		//cout << "past check     token z = " << z  << "   token y = " << y<< endl;
 		if (token == "true" || whichValue(z) == "true")
@@ -152,16 +169,16 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 		//cout << "past replace value" << endl;
 	}
 	if (nextToken() != ";")
-		processError("semicolon expected");
+		processError("semicolon expected -- constStmts");
 	if (whichType(y) != INTEGER && whichType(y) != BOOLEAN)
 	{
-		processError("data type of token on the right-hand side must be INTEGER or BOOLEAN");
+		processError("data type of token on the right-hand side must be INTEGER or BOOLEAN -- constStmts");
 	}
 
 	insert(x, whichType(y), CONSTANT, whichValue(y), YES, 1);
 	x = nextToken();
 	if (x != "begin" && x != "var" && !isNonKeyId(x))
-		processError("non-keyword identifier, \"begin\", or \"var\" expected");
+		processError("non-keyword identifier, \"begin\", or \"var\" expected -- constStmts");
 	if (isNonKeyId(x))
 		constStmts();
 }
@@ -170,20 +187,20 @@ void Compiler::varStmts() // GTG
 {
 	string x, y, z;
 	if (!isNonKeyId(token))
-		processError("non-keyword identifier expected");
+		processError("non-keyword identifier expected -- varStmts");
 	x = ids();
 	if (token != ":")
 		processError("\":\" expected");
 	z = nextToken();
 	if (z != "integer" && z != "boolean")
-		processError("illegal type follows \":\"");
+		processError("illegal type follows \":\" -- varStmts");
 	y = token;
 	if (nextToken() != ";")
-		processError("semicolon expected");
+		processError("semicolon expected -- varStmts");
 	insert(x, whichType(y), VARIABLE, "", YES, 1);
 	z = nextToken();
 	if (!isNonKeyId(z) && z != "begin")
-		processError("non-keyword identifier or \"begin\" expected");
+		processError("non-keyword identifier or \"begin\" expected -- varStmts");
 	if (isNonKeyId(token))
 		varStmts();
 }
@@ -255,6 +272,7 @@ void Compiler::readStmt()       // stage 1, production 5, production 6 (readList
 	nextToken();                                                                          //
 	if (token != "(")                                                                     //should be the start of the ids
 		processError("\'(\' expected -- readStmt");                                       //
+	nextToken();
 	string tempIds = ids();                                                               //uhhhh were going to need to do something with this but im getting the stucture in now
 																						  //ids seems to stop when nextToken finds something that is not a , after the word; idea is it should be the ) at this point
 	if (token != ")")                                                                     //should be end of the ids part
@@ -270,6 +288,7 @@ void Compiler::writeStmt()      // stage 1, production 7, 8's code is included h
 	nextToken();                                                                          // these seem the exact same...
 	if (token != "(")                                                                     // these seem the exact same...
 		processError("\'(\' expected -- writeStmt");                                      // these seem the exact same...
+	nextToken();
 	string tempIds = ids();                                                               // these seem the exact same...
 																						  // these seem the exact same...
 	if (token != ")")                                                                     // these seem the exact same...
@@ -282,29 +301,45 @@ void Compiler::express()        // stage 1, production 9
 {                                                                                                                         //these will probably be heavy on the stack shit
 	//takes in some token -- prodcutions calling this should call nextToken before this production                        //these will probably be heavy on the stack shit
 	term();                                                                                                               //these will probably be heavy on the stack shit
+	expresses();
 }
 void Compiler::expresses()      // stage 1, production 10
 {
-	
+	if (token == "=" || token == "<>" || token == "<=" || token == ">=" || token == "<" || token == ">" )
+	{
+		nextToken();
+		terms();
+		expresses();
+	}
 }
 void Compiler::term()           // stage 1, production 11
 {
 	//assuming this also takes in some token grabbed by previous production
 	factor();
+	terms();
 
 }
 void Compiler::terms()          // stage 1, production 12
 {
-
+	if (token == "+" || token == "-" || token == "or")
+	{
+		factor();
+		terms();
+	}
 }
 void Compiler::factor()         // stage 1, production 13
 {
 	//assuming this ALSO takes in some token from a prior production
 	part();
+	factors();
 }
 void Compiler::factors()        // stage 1, production 14
 {
-
+	if (token == "*" || token == "div" || token == "mod" || token == "and")
+	{
+		part();
+		factors();
+	}
 }
 void Compiler::part()           // stage 1, production 15
 {
@@ -405,14 +440,14 @@ void Compiler::part()           // stage 1, production 15
 //HELPER FUNCTIONS
 bool Compiler::isKeyword(string s) const // GTG
 {
-	if (s == "program" || s == "begin" || s == "end" || s == "var" || s == "const" || s == "integer" || s == "boolean" || s == "true" || s == "false" || s == "not" || s == "mod" || s == "div" || s == "and" || s == "or" || s == "read" || s == "write")
+	if (s == "program" || s == "begin" || s == "end" || s == "var" || s == "const" || s == "integer" || s == "boolean" || s == "true" || s == "false" || s == "not" || s == "mod" || s == "div" || s == "and" || s == "or" || s == "read" || s == "write" || s == ":=" || s == "<=" || s == ">=" || s == "<>")
 		return true;
 	return false;
 }
 
 bool Compiler::isSpecialSymbol(char c) const// GTG
 {
-	if (c == '=' || c == ':' || c == ',' || c == ';' || c == '.' || c == '+' || c == '-') //|| c == '-')
+	if (c == '=' || c == ':' || c == ',' || c == ';' || c == '.' || c == '+' || c == '-' || ch == '(' || ch == ')' || ch == '*' || ch == '<' || ch == '>') //|| c == '-')
 		return true;
 	return false;
 }
@@ -851,13 +886,13 @@ string Compiler::nextToken() // GTG
 				x = nextChar();
 			}
 			if (ch == END_OF_FILE)
-				processError("unexpected end of file");
+				processError("unexpected end of file -- nextToken");
 			else
 				nextChar();
 		}
 
 		else if (ch == '}')						// case '}'
-			processError("'}' cannot begin token");
+			processError("'}' cannot begin token -- nextToken");
 
 		else if (ch == ' ' || ch == '\t')						// case ' '
 			nextChar();
@@ -881,7 +916,7 @@ string Compiler::nextToken() // GTG
 			}
 			if (ch == END_OF_FILE)
 			{
-				processError("unexpected end of file");
+				processError("unexpected end of file -- nextToken");
 			}
 		}
 
@@ -895,18 +930,19 @@ string Compiler::nextToken() // GTG
 				x = nextChar();
 			}
 			if (ch == END_OF_FILE)
-				processError("unexpected end of file");
+				processError("unexpected end of file -- nextToken");
 		}
 
 		else if (ch == END_OF_FILE)
 			token = ch;
 		else
 		{
-			processError("illegal symbol");
+			cout << int(ch) << endl;
+			processError("illegal symbol -- nextToken");
 		}
 	}
 	token = token.substr(0, 15);
-	//cout << "token = " << token << endl;
+	cout << "token = " << token  << "    -- nextToken" << endl;
 	return token;
 }
 //OTHER ROUTINES                          
