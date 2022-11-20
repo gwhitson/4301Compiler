@@ -1009,6 +1009,11 @@ string Compiler::getTemp()
 	return temp;
 }
 
+string getLabel()
+{
+	return "temp";
+}
+
 bool Compiler::isTemporary(string s) const // determines if s represents a temporary
 {
 	return true; //temp
