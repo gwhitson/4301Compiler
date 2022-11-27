@@ -233,6 +233,7 @@ void Compiler::execStmts()      // stage 1, production 2
 }
 void Compiler::execStmt()       // stage 1, production 3								  //
 {																						  //
+	cout << "execStmt" << endl;
 	if (token == "read")																  //if its  a read go to readStmt
 	{																					  //
 		readStmt();																		  //
@@ -250,6 +251,7 @@ void Compiler::execStmt()       // stage 1, production 3								  //
 }
 void Compiler::assignStmt()     // stage 1, production 4								  //
 {																						  //                                                                               // i feel like i need to rewrite this now
+	cout << "assignStmt" << endl;
 	if (isNonKeyId(token))																  //redundant but never hurts, opens possibility to throw special error too        // i feel like i need to rewrite this now
 	{																					  //                                                                               // i feel like i need to rewrite this now
 		pushOperand(token);
@@ -263,6 +265,7 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 			if (token != ";")															  //                                                                               // i feel like i need to rewrite this now
 				processError("Semicolon expected -- assign stmt");						  //if theres no semicolon it throws an error                                      // i feel like i need to rewrite this now
 		}																				  //                                                                               // i feel like i need to rewrite this now
+		cout << "assignStmt pops" << endl;
 		string opand1, opand2;
 		opand1 = popOperand();
 		opand2 = popOperand();
@@ -273,6 +276,7 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 }
 void Compiler::readStmt()       // stage 1, production 5, production 6 (readList) is included in the code for this one
 {
+	cout << "readStmt" << endl;
 	if (token != "read")                                                                  //
 		processError("read expected -- readStmt");                                        //hella redundant
 	nextToken();                                                                          //
@@ -290,6 +294,7 @@ void Compiler::readStmt()       // stage 1, production 5, production 6 (readList
 }
 void Compiler::writeStmt()      // stage 1, production 7, 8's code is included here
 {
+	cout << "writeStmt" << endl;
 	if (token != "write")
 		processError("write expected -- writeStmt");                                      // these seem the exact same...
 	nextToken();                                                                          // these seem the exact same...
@@ -307,26 +312,37 @@ void Compiler::writeStmt()      // stage 1, production 7, 8's code is included h
 }
 void Compiler::express()        // stage 1, production 9
 {                                                                                                                         //these will probably be heavy on the stack shit
+	cout << "express" << endl;
 	//takes in some token -- prodcutions calling this should call nextToken before this production                        //these will probably be heavy on the stack shit
 	term();                                                                                                               //these will probably be heavy on the stack shit
 	expresses();
 }
 void Compiler::expresses()      // stage 1, production 10
 {
+	cout << "expresses" << endl;
 	if (token == "=" || token == "<>" || token == "<=" || token == ">=" || token == "<" || token == ">")
 	{
-		string opand1, opand2;
+		string opand1, opand2, oper;
 		pushOperator(token);
 		nextToken();
-		terms();
+		term();
+		cout << "expresses pops" << endl;
 		opand1 = popOperand();
 		opand2 = popOperand();
-		code(popOperator(), opand2, opand1);
+		oper = popOperator();
+		code(oper, opand2, opand1);
 		expresses();
+		
+		//test
+		//if (oper == "*")
+		//{
+		//	
+		//}
 	}
 }
 void Compiler::term()           // stage 1, production 11
 {
+	cout << "term" << endl;
 	//assuming this also takes in some token grabbed by previous production
 	factor();
 	terms();
@@ -334,6 +350,7 @@ void Compiler::term()           // stage 1, production 11
 }
 void Compiler::terms()          // stage 1, production 12
 {
+	cout << "terms" << endl;
 	if (token == "+" || token == "-" || token == "or")
 	{
 		string opand1, opand2;
@@ -349,27 +366,43 @@ void Compiler::terms()          // stage 1, production 12
 }
 void Compiler::factor()         // stage 1, production 13
 {
+	cout << "factor" << endl;
 	//assuming this ALSO takes in some token from a prior production
 	part();
 	factors();
 }
 void Compiler::factors()        // stage 1, production 14
 {
+	cout << "factors" << endl;
+	string temp = token;
 	if (token == "*" || token == "div" || token == "mod" || token == "and")
 	{
 		string opand1, opand2;
 		pushOperator(token);
+		nextToken();
 		part();
-
+		
+		
+		cout << "factors pops" << endl;
 		opand1 = popOperand();					 // gen format code call
 		opand2 = popOperand();					 // gen format code call
 		code(popOperator(), opand2, opand1);	 // gen format code call
+		
+		//test
+		
+		
+		if (temp == "*")
+		{
+			cout << opand1 << temp << opand2 << endl;
+		}
+		
 
 		factors();
 	}
 }
 void Compiler::part()           // stage 1, production 15
 {
+	cout << "part" << endl;
 	if (token == "not")                                                                                                                            //   NOT SECTION
 	{                                                                                                                                              //
 		nextToken();                                                                                                                               //
@@ -435,9 +468,11 @@ void Compiler::part()           // stage 1, production 15
 		}                                                                                                                                          //
 		else if (isInteger(token))                                                                                                                 //
 		{                                                                                                                                          //
+			pushOperand("-" + token);
 		}                                                                                                                                          //
 		else if (isNonKeyId(token))                                                                                                                //
 		{                                                                                                                                          //
+			pushOperand("-" + whichValue(token));
 		}                                                                                                                                          //
 		else                                                                                                                                       //
 			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (-)");                        //
@@ -453,14 +488,17 @@ void Compiler::part()           // stage 1, production 15
 	else if (isInteger(token))                                                                                                                     //  PURE INT SECTION
 	{                                                                                                                                              //
 			pushOperand(token);                                                                                                                    //
+			nextToken();
 	}                                                                                                                                              //
 	else if (isBoolean(token))                                                                                                                     //  PURE BOOL SECTION
 	{                                                                                                                                              //
 			pushOperand(token);                                                                                                                    //
+			nextToken();
 	}                                                                                                                                              //
 	else if (isNonKeyId(token))                                                                                                                    //   NON_KEY_ID SECTION
 	{                                                                                                                                              //
 			pushOperand(token);                                                                                                                    //
+			nextToken();
 	}                                                                                                                                              //
 	else                                                                                                                                           //
 		processError("fail in part");                                                                                                              //
@@ -489,7 +527,15 @@ bool Compiler::isKeyword(string s) const // GTG
 bool Compiler::isSpecialSymbol(char c) const// GTG
 {
 	if (c == '=' || c == ':' || c == ',' || c == ';' || c == '.' || c == '+' || c == '-' || ch == '(' || ch == ')' || ch == '*' || ch == '<' || ch == '>') //|| c == '-')
+	{
+		//if (c == ':')
+		//{
+		//	char chr = sourceFile.peek();
+		//	if (chr == '=')
+		//		return false;
+		//}
 		return true;
+	}
 	return false;
 }
 
@@ -705,6 +751,7 @@ void Compiler::code(string op, string operand1, string operand2)
 void Compiler::pushOperator(string op)
 {
 	operatorStk.push(op);
+	cout << "pushOperator: " << op << endl;
 }
 
 string Compiler::popOperator()
@@ -714,14 +761,16 @@ string Compiler::popOperator()
 	{
 		stackStr = operatorStk.top();
 		operatorStk.pop();
+		cout << "popOperator: " << stackStr << endl;
 		return stackStr;
 	}
 	else
 	{
 		cout << "compiler error; operator stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
-		processError("compiler error; operator stack underflow");
+		processError("compiler error; operator stack underflow -- popOperator");
 	}
-	return "temp";
+	//cout << "this should be a fail" << endl;
+	return "this should useless";
 }
 
 void Compiler::pushOperand(string operand)
@@ -734,6 +783,7 @@ void Compiler::pushOperand(string operand)
 		//insert(operand, whichType(operand), , whichValue(operand), NO, 0);
 	}
 	operandStk.push(operand);
+	cout << "pushOperand: "<< operand << endl;
 }
 
 string Compiler::popOperand()
@@ -743,12 +793,13 @@ string Compiler::popOperand()
 	{
 		stackStr = operandStk.top();
 		operandStk.pop();
+		cout << "popOperand: " << stackStr << endl;
 		return stackStr;
 	}
 	else
 	{
 		cout << "compiler error; operand stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
-		processError("compiler error; operand stack underflow");
+		processError("compiler error; operand stack underflow -- popOperand");
 	}
 	return "temp";
 }
@@ -968,6 +1019,12 @@ string Compiler::nextToken() // GTG
 		{
 			token = ch;
 			nextChar();
+			if (ch == '=')
+			{
+				token += ch;
+				nextChar();
+			}
+			
 		}
 		else if (islower(ch)) 	// case islower
 		{
