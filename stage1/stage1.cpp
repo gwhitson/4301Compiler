@@ -1005,9 +1005,7 @@ void Compiler::emitWriteCode(string operand, string operand2)
 
 void Compiler::emitAssignCode(string operand1, string operand2)         // op2 = op1
 {
-	map<string, SymbolTableEntry>::iterator itr;
-	itr = symbolTable.find(operand2);
-	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
+	if (symbolTable.at(operand1).getDataType() != symbolTable.at(operand2).getDataType())
 		processError("incompatible types");
 	if (symbolTable.at(operand2).getMode() != VARIABLE)
 		processError("symbol on left-hand side of assignment must have a storage mode of VARIABLE");
@@ -1016,9 +1014,16 @@ void Compiler::emitAssignCode(string operand1, string operand2)         // op2 =
 	if (operand1 != contentsOfAReg)
 		emit(" ", "mov", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; load " + symbolTable.at(operand1).getInternalName() + " in eax");	// mov	eax, [operand1's inName]
 	emit(" ", "mov", "[" + symbolTable.at(operand2).getInternalName() + "], eax", "; store eax in " + symbolTable.at(operand2).getInternalName());
-	if (isTemporary(operand1))
+	contentsOfAReg = operand2;
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
 		freeTemp();
-	contentsOfAReg = "";
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+	if (isTemporary(operand1))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
 }
 
 void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +  op1
@@ -1036,13 +1041,13 @@ void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +
        contentsOfAReg = "";
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
 	{
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);
 		contentsOfAReg = operand2;
 	}
 	if (contentsOfAReg == operand1)
-		emit(" ", "add", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand1).getValue() + " + " + symbolTable.at(operand2).getValue());
+		emit(" ", "add", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand1 + " + " + operand2);
 	else if (contentsOfAReg == operand2)
-		emit(" ", "add", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue() + " + " + symbolTable.at(operand1).getValue());
+		emit(" ", "add", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " + " + operand1);
 	if (isTemporary(operand1) && contentsOfAReg != operand1)
 		freeTemp();
 	if (isTemporary(operand2) && contentsOfAReg != operand2)
