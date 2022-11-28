@@ -286,7 +286,7 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 		code(popOperator(), opand2, opand1);
 		
 		//pushOperand("temp");
-		pushOperand(contentsOfAReg);
+		//pushOperand(contentsOfAReg);
 		
 	}                                                                                                                                                                      // i feel like i need to rewrite this now
 	else                                                                                                                                                                   // i feel like i need to rewrite this now
@@ -1078,13 +1078,13 @@ void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -
        contentsOfAReg = "";
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
 	{
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);
 		contentsOfAReg = operand2;
 	}
 	if (contentsOfAReg == operand1)
-		emit(" ", "sub", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue() + " - " + symbolTable.at(operand1).getValue());
+		emit(" ", "sub", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " - " + operand1);
 	else
-		emit(" ", "sub", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand1).getValue() + " - " + symbolTable.at(operand2).getValue());
+		emit(" ", "sub", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand1 + " - " + operand2);
 
 	if (isTemporary(contentsOfAReg))
 	{
