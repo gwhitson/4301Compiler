@@ -10,6 +10,9 @@
 #include <time.h> // needed for emit prologue
 #include <stack>
 
+bool insertFalse = false;
+bool insertTrue = false;
+
 //Constructor
 Compiler::Compiler(char** argv) // GTG
 {
@@ -24,6 +27,27 @@ Compiler::~Compiler() // destructor GTG
 	sourceFile.close();
 	listingFile.close();
 	objectFile.close();
+}
+
+bool relOp(string s)            // stage 1, production 16
+{
+	if (s == "=" || s == "<>" || s == "<=" ||s == ">=" ||s == "<" ||s == ">")
+		return true;
+	return false;
+}
+
+bool addLevelOp(string s)           // stage 1, production 17
+{
+	if (s == "+" || s == "-" || s == "or")
+		return true;
+	return false;
+}
+
+bool multLevelOp(string s)           // stage 1, production 18
+{
+	if (s == "*" || s == "div" || s == "mod" ||s == "and")
+		return true;
+	return false;
 }
 
 void Compiler::createListingHeader() // GTG
@@ -233,7 +257,6 @@ void Compiler::execStmts()      // stage 1, production 2
 }
 void Compiler::execStmt()       // stage 1, production 3								  //
 {																						  //
-	cout << "execStmt" << endl;
 	if (token == "read")																  //if its  a read go to readStmt
 	{																					  //
 		readStmt();																		  //
@@ -251,7 +274,6 @@ void Compiler::execStmt()       // stage 1, production 3								  //
 }
 void Compiler::assignStmt()     // stage 1, production 4								  //
 {																						  //                                                                               // i feel like i need to rewrite this now
-	cout << "assignStmt" << endl;
 	if (isNonKeyId(token))																  //redundant but never hurts, opens possibility to throw special error too        // i feel like i need to rewrite this now
 	{																					  //                                                                               // i feel like i need to rewrite this now
 		pushOperand(token);
@@ -265,7 +287,6 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 			if (token != ";")															  //                                                                               // i feel like i need to rewrite this now
 				processError("Semicolon expected -- assign stmt");						  //if theres no semicolon it throws an error                                      // i feel like i need to rewrite this now
 		}																				  //                                                                               // i feel like i need to rewrite this now
-		cout << "assignStmt pops" << endl;
 		string opand1, opand2;
 		opand1 = popOperand();
 		opand2 = popOperand();
@@ -276,7 +297,6 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 }
 void Compiler::readStmt()       // stage 1, production 5, production 6 (readList) is included in the code for this one
 {
-	cout << "readStmt" << endl;
 	if (token != "read")                                                                  //
 		processError("read expected -- readStmt");                                        //hella redundant
 	nextToken();                                                                          //
@@ -294,7 +314,6 @@ void Compiler::readStmt()       // stage 1, production 5, production 6 (readList
 }
 void Compiler::writeStmt()      // stage 1, production 7, 8's code is included here
 {
-	cout << "writeStmt" << endl;
 	if (token != "write")
 		processError("write expected -- writeStmt");                                      // these seem the exact same...
 	nextToken();                                                                          // these seem the exact same...
@@ -310,39 +329,29 @@ void Compiler::writeStmt()      // stage 1, production 7, 8's code is included h
 	if (token != ";")                                                                     // these seem the exact same...
 		processError("\';\' expected -- writeStmt");                                      // these seem the exact same...
 }
+
 void Compiler::express()        // stage 1, production 9
 {                                                                                                                         //these will probably be heavy on the stack shit
-	cout << "express" << endl;
 	//takes in some token -- prodcutions calling this should call nextToken before this production                        //these will probably be heavy on the stack shit
 	term();                                                                                                               //these will probably be heavy on the stack shit
 	expresses();
 }
 void Compiler::expresses()      // stage 1, production 10
 {
-	cout << "expresses" << endl;
-	if (token == "=" || token == "<>" || token == "<=" || token == ">=" || token == "<" || token == ">")
+	if (relOp(token))
 	{
-		string opand1, opand2, oper;
+		string opand1, opand2;
 		pushOperator(token);
 		nextToken();
-		term();
-		cout << "expresses pops" << endl;
+		terms();
 		opand1 = popOperand();
 		opand2 = popOperand();
-		oper = popOperator();
-		code(oper, opand2, opand1);
+		code(popOperator(), opand2, opand1);
 		expresses();
-		
-		//test
-		//if (oper == "*")
-		//{
-		//	
-		//}
 	}
 }
 void Compiler::term()           // stage 1, production 11
 {
-	cout << "term" << endl;
 	//assuming this also takes in some token grabbed by previous production
 	factor();
 	terms();
@@ -350,7 +359,6 @@ void Compiler::term()           // stage 1, production 11
 }
 void Compiler::terms()          // stage 1, production 12
 {
-	cout << "terms" << endl;
 	if (token == "+" || token == "-" || token == "or")
 	{
 		string opand1, opand2;
@@ -360,49 +368,33 @@ void Compiler::terms()          // stage 1, production 12
 		opand1 = popOperand();					 // gen format code call
 		opand2 = popOperand();					 // gen format code call
 		code(popOperator(), opand2, opand1);	 // gen format code call
-
+		//				  , opand1, opand2 ?
 		terms();
 	}
 }
 void Compiler::factor()         // stage 1, production 13
 {
-	cout << "factor" << endl;
 	//assuming this ALSO takes in some token from a prior production
 	part();
 	factors();
 }
 void Compiler::factors()        // stage 1, production 14
 {
-	cout << "factors" << endl;
-	string temp = token;
 	if (token == "*" || token == "div" || token == "mod" || token == "and")
 	{
 		string opand1, opand2;
 		pushOperator(token);
-		nextToken();
 		part();
-		
-		
-		cout << "factors pops" << endl;
+
 		opand1 = popOperand();					 // gen format code call
 		opand2 = popOperand();					 // gen format code call
 		code(popOperator(), opand2, opand1);	 // gen format code call
-		
-		//test
-		
-		
-		if (temp == "*")
-		{
-			cout << opand1 << temp << opand2 << endl;
-		}
-		
-
+		//				  , opand1, opand2 ?
 		factors();
 	}
 }
 void Compiler::part()           // stage 1, production 15
 {
-	cout << "part" << endl;
 	if (token == "not")                                                                                                                            //   NOT SECTION
 	{                                                                                                                                              //
 		nextToken();                                                                                                                               //
@@ -468,11 +460,9 @@ void Compiler::part()           // stage 1, production 15
 		}                                                                                                                                          //
 		else if (isInteger(token))                                                                                                                 //
 		{                                                                                                                                          //
-			pushOperand("-" + token);
 		}                                                                                                                                          //
 		else if (isNonKeyId(token))                                                                                                                //
 		{                                                                                                                                          //
-			pushOperand("-" + whichValue(token));
 		}                                                                                                                                          //
 		else                                                                                                                                       //
 			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (-)");                        //
@@ -488,33 +478,19 @@ void Compiler::part()           // stage 1, production 15
 	else if (isInteger(token))                                                                                                                     //  PURE INT SECTION
 	{                                                                                                                                              //
 			pushOperand(token);                                                                                                                    //
-			nextToken();
 	}                                                                                                                                              //
 	else if (isBoolean(token))                                                                                                                     //  PURE BOOL SECTION
 	{                                                                                                                                              //
 			pushOperand(token);                                                                                                                    //
-			nextToken();
 	}                                                                                                                                              //
 	else if (isNonKeyId(token))                                                                                                                    //   NON_KEY_ID SECTION
 	{                                                                                                                                              //
 			pushOperand(token);                                                                                                                    //
-			nextToken();
 	}                                                                                                                                              //
 	else                                                                                                                                           //
 		processError("fail in part");                                                                                                              //
 }
-//void Compiler::relOp()           // stage 1, production 16
-//{
-//
-//}
-//void Compiler::addLevelOp()           // stage 1, production 17
-//{
-//
-//}
-//void Compiler::multLevelOp()           // stage 1, production 18
-//{
-//
-//}
+
 
 //HELPER FUNCTIONS
 bool Compiler::isKeyword(string s) const // GTG
@@ -527,15 +503,7 @@ bool Compiler::isKeyword(string s) const // GTG
 bool Compiler::isSpecialSymbol(char c) const// GTG
 {
 	if (c == '=' || c == ':' || c == ',' || c == ';' || c == '.' || c == '+' || c == '-' || ch == '(' || ch == ')' || ch == '*' || ch == '<' || ch == '>') //|| c == '-')
-	{
-		//if (c == ':')
-		//{
-		//	char chr = sourceFile.peek();
-		//	if (chr == '=')
-		//		return false;
-		//}
 		return true;
-	}
 	return false;
 }
 
@@ -697,6 +665,7 @@ string Compiler::whichValue(string name) //tells which value a name has
 			value = itr->second.getValue();
 		else
 		{
+			cout << "Token: " << token << endl;
 			processError("reference to undefined symbol -- whichValue");
 		}
 	return value;
@@ -709,9 +678,9 @@ void Compiler::code(string op, string operand1, string operand2)
 	else if (op == "end")
 		emitEpilogue();
 	else if (op == "read")
-		emitReadCode(op, operand2);
+		emitReadCode(operand1);
 	else if (op == "write")
-		emitWriteCode(op, operand2);
+		emitWriteCode(operand1);
 	else if (op == ":=")
 		emitAssignCode(operand1, operand2);
 	else if (op == "+")
@@ -750,58 +719,75 @@ void Compiler::code(string op, string operand1, string operand2)
 
 void Compiler::pushOperator(string op)
 {
-	operatorStk.push(op);
 	cout << "pushOperator: " << op << endl;
+	operatorStk.push(op);
 }
 
 string Compiler::popOperator()
 {
-	string stackStr;																									  // this needs a return -gw
+	string stackStr;
 	if (!operatorStk.empty())
 	{
 		stackStr = operatorStk.top();
 		operatorStk.pop();
-		cout << "popOperator: " << stackStr << endl;
-		return stackStr;
 	}
 	else
 	{
 		cout << "compiler error; operator stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
-		processError("compiler error; operator stack underflow -- popOperator");
+		processError("compiler error; operator stack underflow");
 	}
-	//cout << "this should be a fail" << endl;
-	return "this should useless";
+	return stackStr;
 }
 
 void Compiler::pushOperand(string operand)
 {
 	map<string, SymbolTableEntry>::iterator itr;
-	itr = symbolTable.find(operand);
-	
-	if (isLiteral(operand) && itr != symbolTable.end())
+	itr = symbolTable.find(operand.substr(0,15));
+	if (isLiteral(operand) && itr == symbolTable.end())
 	{
-		//insert(operand, whichType(operand), , whichValue(operand), NO, 0);
+		if (operand == "true")
+		{
+			if (!insertTrue)
+			{
+				if (symbolTable.size() == 255)
+					processError("symbol table overflow");
+				insert("TRUE",BOOLEAN,CONSTANT,"-1",YES,1);
+				insertTrue = true;
+			}
+		}
+		else if (operand == "false")
+		{
+			if (!insertFalse)
+			{
+				if (symbolTable.size() == 255)
+					processError("symbol table overflow");
+				insert("FALSE",BOOLEAN,CONSTANT,"0",YES,1);
+				insertFalse = true;
+			}
+		}
 	}
+	else
+		insert(operand, whichType(operand), CONSTANT, whichValue(operand), YES, 1);
+	
+	
+	cout << "pushOperand: " << operand << endl;
 	operandStk.push(operand);
-	cout << "pushOperand: "<< operand << endl;
 }
 
 string Compiler::popOperand()
-{                                                                                                                 // this also needs one -gw
+{
 	string stackStr;
 	if (!operandStk.empty())
 	{
 		stackStr = operandStk.top();
 		operandStk.pop();
-		cout << "popOperand: " << stackStr << endl;
-		return stackStr;
 	}
 	else
 	{
 		cout << "compiler error; operand stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
-		processError("compiler error; operand stack underflow -- popOperand");
+		processError("compiler error; operand stack underflow");
 	}
-	return "temp";
+	return stackStr;
 }
 
 //EMIT ROUTINES
@@ -867,92 +853,745 @@ void Compiler::emitStorage()
 
 void Compiler::emitReadCode(string operand, string operand2)
 {
+	//static bool definedSorage = false;
+	map<string, SymbolTableEntry>::iterator itr;
+	while (operand.length() > 0)
+	{
+		uint index = operand.find(',');                              
+		string name;
 
+		if (index != 0 && index <= operand.length())                 
+		{                                                            
+			name = operand.substr(0, index);                      	 
+			operand = operand.substr(index + 1, operand.length());   
+		}                                                            
+		else                                                         
+		{                                                            
+			index = operand.length();                                
+			name = operand.substr(0, index);                         
+			uint colon = name.find(':');
+			if (colon > 0 && colon < name.length())
+				name = name.substr(0, name.length() - 1);
+			operand = operand.substr(index, operand.length());       
+		}
+		itr = symbolTable.find(name);
+		if (itr != symbolTable.end())
+		{
+			
+		}
+		else
+		{
+			cout << "Name: " << name << endl;
+			processError("reference to undefined symbol");
+		}
+		if (itr->second.getDataType() != INTEGER)
+			processError("can't read variables of this type");
+		if (itr->second.getMode() != VARIABLE)
+			processError("attempting to read to a read-only location");
+		emit(" ", "call", "ReadInt", "; read int; value placed in eax");
+		emit(" ", "mov", "[" + itr->second.getInternalName() + "], eax", "; store eax at " + itr->first);
+		contentsOfAReg = name;
+	}
 }
+
 void Compiler::emitWriteCode(string operand, string operand2)
 {
+	//static bool definedSorage = false;
+	map<string, SymbolTableEntry>::iterator itr;
+	while (operand.length() > 0)
+	{
+		uint index = operand.find(',');                              
+		string name;
 
+		if (index != 0 && index <= operand.length())                 
+		{                                                            
+			name = operand.substr(0, index);                      	 
+			operand = operand.substr(index + 1, operand.length());   
+		}                                                            
+		else                                                         
+		{                                                            
+			index = operand.length();                                
+			name = operand.substr(0, index);                         
+			uint colon = name.find(':');
+			if (colon > 0 && colon < name.length())
+				name = name.substr(0, name.length() - 1);
+			operand = operand.substr(index, operand.length());       
+		}
+		itr = symbolTable.find(name);
+		if (itr != symbolTable.end())
+		{
+			
+		}
+		else
+		{
+			cout << "Name: " << name << endl;
+			processError("reference to undefined symbol");
+		}
+		if (itr->first != contentsOfAReg)
+		{
+			emit(" ", "mov", "eax, [" + itr->second.getInternalName() + "]", "; load " + name + " in eax");
+			contentsOfAReg = name;
+		}
+		if (itr->second.getDataType() != INTEGER || itr->second.getDataType() != BOOLEAN)
+			emit(" ", "call", "WriteInt", "; output contents of eax");
+		emit(" ", "call", "Crlf", "; output newline");
+	}
 }
+
 void Compiler::emitAssignCode(string operand1, string operand2)         // op2 = op1
 {
-	//if (whichType(operand1) != whichType(operand2))
-	//	processError("incompatible types");
-	//if (symbolTable.at(operand2).storeTypes() != "VARIABLE")
-	//	processError("symbol on left-hand side of assignment must have a storage mode of VARIABLE");
-	//if (symbolTable.at(operand2).storeTypes() != "VARIABLE")
-	//	processError("symbol on left-hand side of assignment must have a storage mode of VARIABLE");
-	//if (operand1 == operand2)
-	//	return;
-	//if (operand1 != contentsOfAReg)
-	//	emit(" ", "mov", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; load " + symbolTable.at(operand1).externalName() + " in eax");	// mov	eax, [operand1's inName]
-
+	map<string, SymbolTableEntry>::iterator itr;
+	itr = symbolTable.find(operand2);
+	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
+		processError("incompatible types");
+	if (symbolTable.at(operand2).getMode() != VARIABLE)
+		processError("symbol on left-hand side of assignment must have a storage mode of VARIABLE");
+	if (operand1 == operand2)
+		return;
+	if (operand1 != contentsOfAReg)
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; load " + symbolTable.at(operand1).getInternalName() + " in eax");	// mov	eax, [operand1's inName]
+	emit(" ", "mov", "[" + symbolTable.at(operand2).getInternalName() + "], eax", "; store eax in " + symbolTable.at(operand2).getInternalName());
+	if (isTemporary(operand1))
+		freeTemp();
+	contentsOfAReg = "";
 }
+
 void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +  op1
 {
-	//if (whichType(operand1) != "integer" || whichType(operand2) != "integer")
-	//	processError("illegal type");
-	////if (if the A Register holds a temp not operand1 nor operand2)
-	//
-	////if (the A register holds a non-temp not operand1 nor operand2 then deassign it)
-	//if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
-	//	emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; AReg = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
-	//emit(" ", "add", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; AReg = " + symbolTable.at(operand2).getValue() + " + " + symbolTable.at(operand1).getValue());	// add	eax, [operand1's inName]
+	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
+		processError("incompatible types");
+	if (isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+	{
+		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+		symbolTable.at(contentsOfAReg).setAlloc(YES);
+		contentsOfAReg = "";
+	}
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+       contentsOfAReg = "";
+	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
+		contentsOfAReg = operand2;
+	}
+	if (contentsOfAReg == operand1)
+		emit(" ", "add", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue() + " + " + symbolTable.at(operand1).getValue());
+	else
+		emit(" ", "add", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand1).getValue() + " + " + symbolTable.at(operand2).getValue());
+
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(INTEGER);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -  op1
 {
+	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
+		processError("incompatible types");
+	if (isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+	{
+		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+		symbolTable.at(contentsOfAReg).setAlloc(YES);
+		contentsOfAReg = "";
+	}
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+       contentsOfAReg = "";
+	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
+		contentsOfAReg = operand2;
+	}
+	if (contentsOfAReg == operand1)
+		emit(" ", "sub", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue() + " - " + symbolTable.at(operand1).getValue());
+	else
+		emit(" ", "sub", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand1).getValue() + " - " + symbolTable.at(operand2).getValue());
 
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(INTEGER);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitMultiplicationCode(string operand1, string operand2) // op2 *  op1
 {
-
+	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
+		processError("incompatible types");
+	if (isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+		symbolTable.at(contentsOfAReg).setAlloc(YES);
+		contentsOfAReg = "";
+	}
+	if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; mov " + symbolTable.at(operand2).getInternalName() + " into eax");
+		contentsOfAReg = operand2;
+	}
+	if (contentsOfAReg == operand2)
+		emit(" ", "imul", "dword [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " times " + operand1);
+	else
+		emit(" ", "imul", "dword [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand1 + " times " + operand2); 
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(INTEGER);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitDivisionCode(string operand1, string operand2)       // op2 /  op1
 {
-
+	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
+		processError("incompatible types");
+	if (isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+		symbolTable.at(contentsOfAReg).setAlloc(YES);
+		contentsOfAReg = "";
+	}
+	if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; mov " + symbolTable.at(operand2).getInternalName() + " into eax");
+		contentsOfAReg = operand2;
+	}
+	emit(" ", "cdq", " ", "; extend sign of dividend from the A register to edx:eax");
+	
+	if (contentsOfAReg == operand2)
+		emit(" ", "idiv", "dword [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " divided by " + operand1);
+	else
+		emit(" ", "idiv", "dword [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand1 + " divided by " + operand2); 
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(INTEGER);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitModuloCode(string operand1, string operand2)         // op2 %  op1
 {
-
+	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
+		processError("incompatible types");
+	if (isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+		symbolTable.at(contentsOfAReg).setAlloc(YES);
+		contentsOfAReg = "";
+	}
+	if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; mov " + symbolTable.at(operand2).getInternalName() + " into eax");
+		contentsOfAReg = operand2;
+	}
+	emit(" ", "cdq", " ", "; extend sign of dividend from the A register to edx:eax");
+	if (contentsOfAReg == operand2)
+		emit(" ", "idiv", "dword [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " divided by " + operand1);
+	else
+		emit(" ", "idiv", "dword [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand1 + " divided by " + operand2); 
+	emit("", "xchg", "eax,edx", "remainder");
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(INTEGER);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitNegationCode(string operand1, string operand2)           // -op1
 {
+	if (symbolTable.at(operand1).getDataType() != INTEGER)
+		processError("incompatible types");
+	if (isTemporary(contentsOfAReg) && contentsOfAReg != operand1)
+	{
+		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+		symbolTable.at(contentsOfAReg).setAlloc(YES);
+		contentsOfAReg = "";
+	}
+	if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand1)
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand1)
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand1);
+	emit(" ", "neg", "eax", "; negate eax");
 
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitNotCode(string operand1, string operand2)                // !op1
 {
-
+    if (symbolTable.at(operand1).getDataType() != BOOLEAN || symbolTable.at(operand2).getDataType() != BOOLEAN)
+		processError("illegal type");
+	if (isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+		symbolTable.at(contentsOfAReg).setAlloc(YES);
+		contentsOfAReg = "";
+	}
+	if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand1)
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand1)
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", " ; eax = " + operand1);
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitAndCode(string operand1, string operand2)            // op2 && op1
 {
-
+    if (symbolTable.at(operand1).getDataType() != BOOLEAN || symbolTable.at(operand2).getDataType() != BOOLEAN)
+		processError("illegal type");
+	if (isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+		symbolTable.at(contentsOfAReg).setAlloc(YES);
+		contentsOfAReg = "";
+	}
+	if (!isTemporary(contentsOfAReg) && ((contentsOfAReg != operand2) || contentsOfAReg != operand2))
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
+	if (contentsOfAReg == operand2)
+		emit(" ", "and", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " and " + operand1);
+	else if (contentsOfAReg == operand1)
+		emit(" ", "and", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand1 + " and " + operand2);
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitOrCode(string operand1, string operand2)             // op2 || op1
 {
-
+    if (symbolTable.at(operand1).getDataType() != BOOLEAN || symbolTable.at(operand2).getDataType() != BOOLEAN)
+		processError("illegal type");
+	if (isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+		symbolTable.at(contentsOfAReg).setAlloc(YES);
+		contentsOfAReg = "";
+	}
+	if (!isTemporary(contentsOfAReg) && ((contentsOfAReg != operand2) || contentsOfAReg != operand2))
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
+	if (contentsOfAReg == operand2)
+		emit(" ", "or", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " or " + operand1);
+	else if (contentsOfAReg == operand1)
+		emit(" ", "or", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand1 + " or " + operand2);
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitEqualityCode(string operand1, string operand2)       // op2 == op1
 {
+	if (symbolTable.at(operand1).getDataType() != symbolTable.at(operand2).getDataType())
+		processError("incompatible types");
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+        contentsOfAReg = operand2;
+    }
+    string label1 = getLabel();
+    string label2 = getLabel();
+    if (contentsOfAReg == operand2)
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "compare " + operand2 + " and " + operand1);
+    else
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "compare " + operand1 + " and " + operand2);
+    emit(" ", "je", label1, "; if " + operand2 + " = " + operand1 + " jump and mov TRUE into eax");
+    emit(" ", "mov", "eax, [FALSE]", "; else mov FALSE into eax");
+    
+	if (!insertTrue)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("TRUE",BOOLEAN,CONSTANT,"-1",YES,1);
+		insertTrue = true;
+    }
+    if (!insertFalse)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("FALSE",BOOLEAN,CONSTANT,"0",YES,1);
+		insertFalse = true;
+    }
+    emit(" ", "jmp", label2, "; unconditional jump to the next label");
+    emit(label1 + ":", " ", "; label");
+    emit(" ", "mov", "eax, [TRUE]", "; mov TRUE into eax");
+    emit(label2 + ":");
 
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitInequalityCode(string operand1, string operand2)     // op2 != op1
 {
+	if (symbolTable.at(operand1).getDataType() != symbolTable.at(operand2).getDataType())
+		processError("incompatible types");
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+        contentsOfAReg = operand2;
+    }
+    string label1 = getLabel();
+    string label2 = getLabel();
+    if (contentsOfAReg == operand2)
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "compare " + operand2 + " and " + operand1);
+    else
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "compare " + operand1 + " and " + operand2);
+    emit(" ", "jne", label1, "; if " + operand2 + " <> " + operand1 + " jump and mov TRUE into eax");
+    emit(" ", "mov", "eax, [FALSE]", "; else mov FALSE into eax");
+    
+	if (!insertTrue)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("TRUE",BOOLEAN,CONSTANT,"-1",YES,1);
+		insertTrue = true;
+    }
+    if (!insertFalse)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("FALSE",BOOLEAN,CONSTANT,"0",YES,1);
+		insertFalse = true;
+    }
+    emit(" ", "jmp", label2, "; unconditional jump to the next label");
+    emit(label1 + ":", " ", "; label");
+    emit(" ", "mov", "eax, [TRUE]", "; mov TRUE into eax");
+    emit(label2 + ":");
 
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitLessThanCode(string operand1, string operand2)       // op2 <  op1
 {
+	if (symbolTable.at(operand1).getDataType() != symbolTable.at(operand2).getDataType())
+		processError("incompatible types");
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+        contentsOfAReg = operand2;
+    }
+    string label1 = getLabel();
+    string label2 = getLabel();
+    if (contentsOfAReg == operand2)
+	{
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "compare " + operand2 + " and " + operand1);
+	   emit(" ", "jl", label1, "; if " + operand2 + " < " + operand1 + " jump and mov TRUE into eax");
+	}
+    else
+	{
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "compare " + operand1 + " and " + operand2);
+	   emit(" ", "jl", label1, "; if " + operand1 + " < " + operand2 + " jump and mov TRUE into eax");
+	}
+    emit(" ", "mov", "eax, [FALSE]", "; else mov FALSE into eax");
+    
+	if (!insertTrue)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("TRUE",BOOLEAN,CONSTANT,"-1",YES,1);
+		insertTrue = true;
+    }
+    if (!insertFalse)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("FALSE",BOOLEAN,CONSTANT,"0",YES,1);
+		insertFalse = true;
+    }
+    emit(" ", "jmp", label2, "; unconditional jump to the next label");
+    emit(label1 + ":", " ", "; label");
+    emit(" ", "mov", "eax, [TRUE]", "; mov TRUE into eax");
+    emit(label2 + ":");
 
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitLessThanOrEqualToCode(string operand1, string operand2) // op2 <= op1
 {
+	if (symbolTable.at(operand1).getDataType() != symbolTable.at(operand2).getDataType())
+		processError("incompatible types");
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+        contentsOfAReg = operand2;
+    }
+    string label1 = getLabel();
+    string label2 = getLabel();
+    if (contentsOfAReg == operand2)
+	{
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "compare " + operand2 + " and " + operand1);
+	   emit(" ", "jle", label1, "; if " + operand2 + " <= " + operand1 + " jump and mov TRUE into eax");
+	}
+    else
+	{
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "compare " + operand1 + " and " + operand2);
+	   emit(" ", "jle", label1, "; if " + operand1 + " <= " + operand2 + " jump and mov TRUE into eax");
+	}
+    emit(" ", "mov", "eax, [FALSE]", "; else mov FALSE into eax");
+    
+	if (!insertTrue)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("TRUE",BOOLEAN,CONSTANT,"-1",YES,1);
+		insertTrue = true;
+    }
+    if (!insertFalse)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("FALSE",BOOLEAN,CONSTANT,"0",YES,1);
+		insertFalse = true;
+    }
+    emit(" ", "jmp", label2, "; unconditional jump to the next label");
+    emit(label1 + ":", " ", "; label");
+    emit(" ", "mov", "eax, [TRUE]", "; mov TRUE into eax");
+    emit(label2 + ":");
 
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
+   pushOperand(contentsOfAReg);
 }
 void Compiler::emitGreaterThanCode(string operand1, string operand2)    // op2 >  op1
 {
+	if (symbolTable.at(operand1).getDataType() != symbolTable.at(operand2).getDataType())
+		processError("incompatible types");
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+        contentsOfAReg = operand2;
+    }
+    string label1 = getLabel();
+    string label2 = getLabel();
+    if (contentsOfAReg == operand2)
+	{
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "compare " + operand2 + " and " + operand1);
+	   emit(" ", "jg", label1, "; if " + operand2 + " > " + operand1 + " jump and mov TRUE into eax");
+	}
+    else
+	{
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "compare " + operand1 + " and " + operand2);
+	   emit(" ", "jg", label1, "; if " + operand1 + " > " + operand2 + " jump and mov TRUE into eax");
+	}
+    emit(" ", "mov", "eax, [FALSE]", "; else mov FALSE into eax");
+    
+	if (!insertTrue)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("TRUE",BOOLEAN,CONSTANT,"-1",YES,1);
+		insertTrue = true;
+    }
+    if (!insertFalse)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("FALSE",BOOLEAN,CONSTANT,"0",YES,1);
+		insertFalse = true;
+    }
+    emit(" ", "jmp", label2, "; unconditional jump to the next label");
+    emit(label1 + ":", " ", "; label");
+    emit(" ", "mov", "eax, [TRUE]", "; mov TRUE into eax");
+    emit(label2 + ":");
 
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
+   pushOperand(contentsOfAReg);
 }
+
 void Compiler::emitGreaterThanOrEqualToCode(string operand1, string operand2) // op2 >= op1
 {
+	if (symbolTable.at(operand1).getDataType() != symbolTable.at(operand2).getDataType())
+		processError("incompatible types");
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+		contentsOfAReg = "";
+	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+        contentsOfAReg = operand2;
+    }
+    string label1 = getLabel();
+    string label2 = getLabel();
+    if (contentsOfAReg == operand2)
+	{
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "compare " + operand2 + " and " + operand1);
+	   emit(" ", "jge", label1, "; if " + operand2 + " >= " + operand1 + " jump and mov TRUE into eax");
+	}
+    else
+	{
+       emit(" ", "cmp", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "compare " + operand1 + " and " + operand2);
+	   emit(" ", "jge", label1, "; if " + operand1 + " >= " + operand2 + " jump and mov TRUE into eax");
+	}
+    emit(" ", "mov", "eax, [FALSE]", "; else mov FALSE into eax");
+    
+	if (!insertTrue)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("TRUE",BOOLEAN,CONSTANT,"-1",YES,1);
+		insertTrue = true;
+    }
+    if (!insertFalse)
+    {
+		if (symbolTable.size() == 255)
+			processError("symbol table overflow");
+		insert("FALSE",BOOLEAN,CONSTANT,"0",YES,1);
+		insertFalse = true;
+    }
+    emit(" ", "jmp", label2, "; unconditional jump to the next label");
+    emit(label1 + ":", " ", "; label");
+    emit(" ", "mov", "eax, [TRUE]", "; mov TRUE into eax");
+    emit(label2 + ":");
 
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+   contentsOfAReg = getTemp();
+   symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
+   pushOperand(contentsOfAReg);
 }
 
 //LEXICAL ROUTINES
@@ -1019,12 +1658,6 @@ string Compiler::nextToken() // GTG
 		{
 			token = ch;
 			nextChar();
-			if (ch == '=')
-			{
-				token += ch;
-				nextChar();
-			}
-			
 		}
 		else if (islower(ch)) 	// case islower
 		{
@@ -1124,12 +1757,17 @@ string Compiler::getTemp()
 	return temp;
 }
 
-string getLabel()
+string Compiler::getLabel()
 {
-	return "temp";
+	static int count_label = 0;
+	string str = ".L" + to_string(count_label);
+	count_label++;
+	return str;
 }
 
 bool Compiler::isTemporary(string s) const // determines if s represents a temporary
 {
-	return true; //temp
+	if (s.substr(0,1) == "T")
+		return true;
+	return false;
 }
