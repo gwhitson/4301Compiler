@@ -657,7 +657,7 @@ void Compiler::insert(string externalName, storeTypes inType, modes inMode, stri
 		// if the name is lowercase, that means it comes from pascal source code (external name) and needs to have the internal name generated
 		if (symbolTable.size() < 256)
 		{
-			if (name[0] < 'Z')
+			if (name[0] < 'Z' && name[0] > 'A')
 			{
 				symbolTable.insert(pair<string, SymbolTableEntry>(name, SymbolTableEntry(name, inType, inMode, inValue, inAlloc, inUnits)));
 			}
@@ -829,7 +829,7 @@ void Compiler::pushOperand(string operand)
 	else if(isInteger(operand))
 	{
 		cout << "right one" << endl;
-		insert(genInternalName(INTEGER), INTEGER, CONSTANT, operand, YES, 1);
+		insert(operand, INTEGER, CONSTANT, operand, YES, 1);
 	}
 	else if (itr == symbolTable.end())                                                                            // unsure
 		insert(operand, whichType(operand), CONSTANT, whichValue(operand), YES, 1);           // unsure
@@ -1024,6 +1024,7 @@ void Compiler::emitAssignCode(string operand1, string operand2)         // op2 =
 		freeTemp();
 		contentsOfAReg = "";
 	}
+	freeTemp();
 }
 
 void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +  op1
@@ -1058,6 +1059,7 @@ void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +
 		contentsOfAReg = "";
 	}
     contentsOfAReg = getTemp();
+	cout << "contents of AReg = " << contentsOfAReg << endl;
     symbolTable.at(contentsOfAReg).setDataType(INTEGER);
     pushOperand(contentsOfAReg);
 }
@@ -1100,9 +1102,11 @@ void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -
 
 void Compiler::emitMultiplicationCode(string operand1, string operand2) // op2 *  op1
 {
-	cout << "operand1: " << operand1 << "\noperand2: " << operand2 << endl;
 	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
+	{
+		cout << "StoreType of operand1: " << symbolTable.at(operand1).getDataType() << "    StoreType of operand2: " << symbolTable.at(operand2).getDataType() << endl;
 		processError("incompatible types");
+	}
 	if (isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
 	{
 		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
@@ -1118,19 +1122,20 @@ void Compiler::emitMultiplicationCode(string operand1, string operand2) // op2 *
 	}
 	if (contentsOfAReg == operand2)
 		emit(" ", "imul", "dword [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " times " + operand1);
-	else if (contentsOfAReg == operand2)
+	else
 		emit(" ", "imul", "dword [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand1 + " times " + operand2); 
-
-	if (isTemporary(operand1) && contentsOfAReg != operand1)
-		freeTemp();
-	if (isTemporary(operand2) && contentsOfAReg != operand2)
-		freeTemp();
+	cout << "contents of AReg: " << contentsOfAReg << "    operand1: " << operand1 << "   operand2: "<< operand2 << endl;
 	if (isTemporary(contentsOfAReg))
 	{
 		freeTemp();
 		contentsOfAReg = "";
 	}
+	else if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	else if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
    contentsOfAReg = getTemp();
+	cout << "mult   contents of AReg = " << contentsOfAReg << endl;
    symbolTable.at(contentsOfAReg).setDataType(INTEGER);
    pushOperand(contentsOfAReg);
 }
@@ -1831,6 +1836,8 @@ void Compiler::processError(string err) // GTG
 
 void Compiler::freeTemp()
 {
+	string temp = "T" + to_string(currentTempNo);
+	symbolTable.at(temp).setDataType(UNKNOWN);
 	currentTempNo--;
 	if (currentTempNo < -1)
 		processError("compiler error, currentTempNo should be ≥ –1:");
@@ -1857,7 +1864,7 @@ string Compiler::getLabel()
 
 bool Compiler::isTemporary(string s) const // determines if s represents a temporary
 {
-	if (s.substr(0,1) == "T")
+	if (s[0] == 'T')
 		return true;
 	return false;
 }
