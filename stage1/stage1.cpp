@@ -129,6 +129,17 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 		processError("period expected -- beginEndStmt");
 	nextToken();
 	code("end", ".");
+	
+	for (uint i = 0 ; i < operandStk.size(); i++)                                //debug
+	{                                                                            //debug
+		cout << "operandStk[" <<i << "] = "<< operandStk.top() << endl;          //debug
+		operandStk.pop();                                                        //debug
+	}                                                                            //debug
+	for (uint j = 0 ; j < operatorStk.size(); j++)                               //debug
+	{                                                                            //debug
+		cout << "operatorStk[" <<j << "] = "<< operatorStk.top() << endl;        //debug
+		operatorStk.pop();                                                       //debug
+	}                                                                            //debug
 
 	//execStmts();
 	//if (nextToken() != "end")
@@ -382,10 +393,8 @@ void Compiler::terms()          // stage 1, production 12
 		cout << "terms pops" << endl;
 		opand1 = popOperand();					 // gen format code call
 		opand2 = popOperand();					 // gen format code call
+		cout << "opand1 = " << opand1 << "     opand2 = " << opand2 << endl;
 		code(popOperator(), opand2, opand1);	 // gen format code call
-		
-		//pushOperand("temp");
-		pushOperand(contentsOfAReg);
 
 		terms();
 	}
@@ -415,13 +424,8 @@ void Compiler::factors()        // stage 1, production 14
 		cout << "factors pops" << endl;
 		opand1 = popOperand();					 // gen format code call
 		opand2 = popOperand();					 // gen format code call
+		cout << opand1 << temp << opand2 << " -------------- test" << endl;
 		code(popOperator(), opand2, opand1);	 // gen format code call
-		
-		//test
-		pushOperand(contentsOfAReg);
-		
-		//pushOperand("temp");
-		
 
 		factors();
 	}
@@ -586,12 +590,11 @@ bool Compiler::isInteger(string s) const // GTG
 {
 	for (unsigned int i = 0; i < s.length(); i++)
 	{
-		if (isdigit(s[i]))
+		if (!isdigit(s[i]))
 		{
 
-		}
-		else
 			return false;
+		}
 	}
 	return true;
 }
@@ -729,6 +732,7 @@ string Compiler::whichValue(string name) //tells which value a name has
 
 void Compiler::code(string op, string operand1, string operand2)
 {
+	cout << "code::::::::: operator = " << op << "   operand1 = " << operand1 << "   operand2 = " << operand2 << endl;
 	if (op == "program")
 		emitPrologue(operand1);
 	else if (op == "end")
@@ -821,6 +825,11 @@ void Compiler::pushOperand(string operand)
 				insertFalse = true;
 			}
 		}
+	}
+	else if(isInteger(operand))
+	{
+		cout << "right one" << endl;
+		insert(genInternalName(INTEGER), INTEGER, CONSTANT, operand, YES, 1);
 	}
 	else if (itr == symbolTable.end())                                                                            // unsure
 		insert(operand, whichType(operand), CONSTANT, whichValue(operand), YES, 1);           // unsure
@@ -1014,39 +1023,39 @@ void Compiler::emitAssignCode(string operand1, string operand2)         // op2 =
 
 void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +  op1
 {
-	cout << "operand1: " << operand1 << "    operand2: " << operand2 << endl;
-	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
-		processError("incompatible types");
-	if (isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
-	{
-		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
-		symbolTable.at(contentsOfAReg).setAlloc(YES);
-		contentsOfAReg = "";
-	}
-	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
-       contentsOfAReg = "";
-	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
-	{
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
-		contentsOfAReg = operand2;
-	}
-	if (contentsOfAReg == operand1)
-		emit(" ", "add", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue() + " + " + symbolTable.at(operand1).getValue());
-	else
-		emit(" ", "add", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand1).getValue() + " + " + symbolTable.at(operand2).getValue());
-	
-	if (isTemporary(contentsOfAReg))
-	{
-		freeTemp();
-		contentsOfAReg = "";
-	}
-	if (isTemporary(operand1) && contentsOfAReg != operand1)
-		freeTemp();
-	if (isTemporary(operand2) && contentsOfAReg != operand2)
-		freeTemp();
-    contentsOfAReg = getTemp();
-    symbolTable.at(contentsOfAReg).setDataType(INTEGER);
-    pushOperand(contentsOfAReg);
+	//if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
+	//	processError("incompatible types");
+	//if (isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+	//{
+	//	emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+	//	symbolTable.at(contentsOfAReg).setAlloc(YES);
+	//	contentsOfAReg = "";
+	//}
+	//if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+    //   contentsOfAReg = "";
+	//if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
+	//{
+	//	emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
+	//	contentsOfAReg = operand2;
+	//}
+	//if (contentsOfAReg == operand1)
+	//	emit(" ", "add", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue() + " + " + symbolTable.at(operand1).getValue());
+	//else
+	//	emit(" ", "add", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand1).getValue() + " + " + symbolTable.at(operand2).getValue());
+	//
+	//cout << "contents of AReg: " << contentsOfAReg << "    operand1: " << operand1 << "   operand2: "<< operand2 << endl;
+	//if (isTemporary(contentsOfAReg))
+	//{
+	//	//freeTemp();
+	//	contentsOfAReg = "";
+	//}
+	//else if (isTemporary(operand1) && contentsOfAReg != operand1)
+	//	freeTemp();
+	//else if (isTemporary(operand2) && contentsOfAReg != operand2)
+	//	freeTemp();
+    //contentsOfAReg = getTemp();
+    //symbolTable.at(contentsOfAReg).setDataType(INTEGER);
+    //pushOperand(contentsOfAReg);
 }
 
 void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -  op1
@@ -1106,14 +1115,15 @@ void Compiler::emitMultiplicationCode(string operand1, string operand2) // op2 *
 		emit(" ", "imul", "dword [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " times " + operand1);
 	else
 		emit(" ", "imul", "dword [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand1 + " times " + operand2); 
+	cout << "contents of AReg: " << contentsOfAReg << "    operand1: " << operand1 << "   operand2: "<< operand2 << endl;
 	if (isTemporary(contentsOfAReg))
 	{
 		freeTemp();
 		contentsOfAReg = "";
 	}
-	if (isTemporary(operand1) && contentsOfAReg != operand1)
+	else if (isTemporary(operand1) && contentsOfAReg != operand1)
 		freeTemp();
-	if (isTemporary(operand2) && contentsOfAReg != operand2)
+	else if (isTemporary(operand2) && contentsOfAReg != operand2)
 		freeTemp();
    contentsOfAReg = getTemp();
    symbolTable.at(contentsOfAReg).setDataType(INTEGER);
@@ -1316,7 +1326,6 @@ void Compiler::emitOrCode(string operand1, string operand2)             // op2 |
 
 void Compiler::emitEqualityCode(string operand1, string operand2)       // op2 == op1
 {
-	cout << "operand1: " << operand1 << "    operand2: " << operand2 << endl;
 	if (isLiteral(operand1) && isLiteral(operand2))
 	if (symbolTable.at(operand1).getDataType() != symbolTable.at(operand2).getDataType())
 		processError("incompatible types");
@@ -1799,6 +1808,19 @@ void Compiler::processError(string err) // GTG
 	listingFile << endl << "Error: Line " << lineNo << ": " << err << endl << endl;
 	errorCount++;
 	cout << endl << "Error: Line " << lineNo << ": " << err << endl << endl;	// debug
+	
+	cout << "opandstk size = " << operandStk.size() << endl;
+	for (uint i = 0 ; i < operandStk.size(); i++)
+	{
+		cout << "operandStk[" <<i << "] = "<< operandStk.top() << endl;
+		operandStk.pop();
+	}
+	for (uint j = 0 ; j < operatorStk.size(); j++)
+	{
+		cout << "operatorStk[" <<j << "] = "<< operatorStk.top() << endl;
+		operatorStk.pop();
+	}
+	emitStorage();
 	createListingTrailer();
 }
 
