@@ -515,7 +515,8 @@ void Compiler::part()           // stage 1, production 15
 		}                                                                                                                                          //
 		else if (isNonKeyId(token))                                                                                                                //
 		{                                                                                                                                          //
-			pushOperand("-" + whichValue(token));
+			cout << "debug" << endl;
+			pushOperand(token);
 			nextToken();
 		}                                                                                                                                          //
 		else                                                                                                                                       //
@@ -909,9 +910,12 @@ void Compiler::emitStorage()
 	{
 		itemid = itr->first;
 		comment = "; " + itemid;
-		if (symbolTable.at(itemid).getMode() == VARIABLE && symbolTable.at(itemid).getDataType() != PROG_NAME)
+		if (itemid[0] != 'T')
 		{
-			emit(symbolTable.at(itemid).getInternalName(), "resd", "1", comment);
+			if (symbolTable.at(itemid).getMode() == VARIABLE && symbolTable.at(itemid).getDataType() != PROG_NAME)
+			{
+				emit(symbolTable.at(itemid).getInternalName(), "resd", "1", comment);
+			}
 		}
 	}
 }
@@ -1034,7 +1038,6 @@ void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +
 		processError("incompatible types");
 	if (isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
 	{
-		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
 		symbolTable.at(contentsOfAReg).setAlloc(YES);
 		contentsOfAReg = "";
 	}
@@ -1070,7 +1073,6 @@ void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -
 		processError("incompatible types");
 	if (isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
 	{
-		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
 		symbolTable.at(contentsOfAReg).setAlloc(YES);
 		contentsOfAReg = "";
 	}
@@ -1095,7 +1097,8 @@ void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -
 		freeTemp();
 	if (isTemporary(operand2) && contentsOfAReg != operand2)
 		freeTemp();
-   contentsOfAReg = getTemp();
+    contentsOfAReg = getTemp();
+	cout << "contents of AReg = " << contentsOfAReg << endl;
    symbolTable.at(contentsOfAReg).setDataType(INTEGER);
    pushOperand(contentsOfAReg);
 }
@@ -1283,7 +1286,7 @@ void Compiler::emitAndCode(string operand1, string operand2)            // op2 &
 	if (!isTemporary(contentsOfAReg) && ((contentsOfAReg != operand2) || contentsOfAReg != operand2))
 		contentsOfAReg = "";
 	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);
 	if (contentsOfAReg == operand2)
 		emit(" ", "and", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " and " + operand1);
 	else if (contentsOfAReg == operand1)
@@ -1315,7 +1318,7 @@ void Compiler::emitOrCode(string operand1, string operand2)             // op2 |
 	if (!isTemporary(contentsOfAReg) && ((contentsOfAReg != operand2) || contentsOfAReg != operand2))
 		contentsOfAReg = "";
 	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);
 	if (contentsOfAReg == operand2)
 		emit(" ", "or", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " or " + operand1);
 	else if (contentsOfAReg == operand1)
@@ -1343,7 +1346,7 @@ void Compiler::emitEqualityCode(string operand1, string operand2)       // op2 =
 		contentsOfAReg = "";
 	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
 	{
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);	// mov	eax, [operand2's inName]
         contentsOfAReg = operand2;
     }
     string label1 = getLabel();
@@ -1396,7 +1399,7 @@ void Compiler::emitInequalityCode(string operand1, string operand2)     // op2 !
 		contentsOfAReg = "";
 	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
 	{
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);	// mov	eax, [operand2's inName]
         contentsOfAReg = operand2;
     }
     string label1 = getLabel();
@@ -1449,7 +1452,7 @@ void Compiler::emitLessThanCode(string operand1, string operand2)       // op2 <
 		contentsOfAReg = "";
 	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
 	{
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);	// mov	eax, [operand2's inName]
         contentsOfAReg = operand2;
     }
     string label1 = getLabel();
@@ -1507,7 +1510,7 @@ void Compiler::emitLessThanOrEqualToCode(string operand1, string operand2) // op
 		contentsOfAReg = "";
 	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
 	{
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);	// mov	eax, [operand2's inName]
         contentsOfAReg = operand2;
     }
     string label1 = getLabel();
@@ -1564,7 +1567,7 @@ void Compiler::emitGreaterThanCode(string operand1, string operand2)    // op2 >
 		contentsOfAReg = "";
 	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
 	{
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);	// mov	eax, [operand2's inName]
         contentsOfAReg = operand2;
     }
     string label1 = getLabel();
@@ -1622,7 +1625,7 @@ void Compiler::emitGreaterThanOrEqualToCode(string operand1, string operand2) //
 		contentsOfAReg = "";
 	if (contentsOfAReg != operand1 || contentsOfAReg != operand2)
 	{
-		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());	// mov	eax, [operand2's inName]
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);	// mov	eax, [operand2's inName]
         contentsOfAReg = operand2;
     }
     string label1 = getLabel();
