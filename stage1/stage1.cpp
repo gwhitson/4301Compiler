@@ -1014,6 +1014,7 @@ void Compiler::emitAssignCode(string operand1, string operand2)         // op2 =
 
 void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +  op1
 {
+	cout << "operand1: " << operand1 << "    operand2: " << operand2 << endl;
 	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
 		processError("incompatible types");
 	if (isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
@@ -1033,7 +1034,7 @@ void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +
 		emit(" ", "add", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue() + " + " + symbolTable.at(operand1).getValue());
 	else
 		emit(" ", "add", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand1).getValue() + " + " + symbolTable.at(operand2).getValue());
-
+	
 	if (isTemporary(contentsOfAReg))
 	{
 		freeTemp();
@@ -1043,9 +1044,9 @@ void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +
 		freeTemp();
 	if (isTemporary(operand2) && contentsOfAReg != operand2)
 		freeTemp();
-   contentsOfAReg = getTemp();
-   symbolTable.at(contentsOfAReg).setDataType(INTEGER);
-   pushOperand(contentsOfAReg);
+    contentsOfAReg = getTemp();
+    symbolTable.at(contentsOfAReg).setDataType(INTEGER);
+    pushOperand(contentsOfAReg);
 }
 
 void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -  op1
@@ -1315,6 +1316,8 @@ void Compiler::emitOrCode(string operand1, string operand2)             // op2 |
 
 void Compiler::emitEqualityCode(string operand1, string operand2)       // op2 == op1
 {
+	cout << "operand1: " << operand1 << "    operand2: " << operand2 << endl;
+	if (isLiteral(operand1) && isLiteral(operand2))
 	if (symbolTable.at(operand1).getDataType() != symbolTable.at(operand2).getDataType())
 		processError("incompatible types");
 	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
@@ -1810,7 +1813,7 @@ string Compiler::getTemp()
 {
 	string temp;
 	currentTempNo++;
-	temp = "T" + currentTempNo;
+	temp = "T" + to_string(currentTempNo);
 	if (currentTempNo > maxTempNo)
 		insert(temp, UNKNOWN, VARIABLE, "", NO, 1);
 	maxTempNo++;
