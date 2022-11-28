@@ -1023,39 +1023,38 @@ void Compiler::emitAssignCode(string operand1, string operand2)         // op2 =
 
 void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +  op1
 {
-	//if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
-	//	processError("incompatible types");
-	//if (isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
-	//{
-	//	emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
-	//	symbolTable.at(contentsOfAReg).setAlloc(YES);
-	//	contentsOfAReg = "";
-	//}
-	//if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
-    //   contentsOfAReg = "";
-	//if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
-	//{
-	//	emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
-	//	contentsOfAReg = operand2;
-	//}
-	//if (contentsOfAReg == operand1)
-	//	emit(" ", "add", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue() + " + " + symbolTable.at(operand1).getValue());
-	//else
-	//	emit(" ", "add", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand1).getValue() + " + " + symbolTable.at(operand2).getValue());
-	//
-	//cout << "contents of AReg: " << contentsOfAReg << "    operand1: " << operand1 << "   operand2: "<< operand2 << endl;
-	//if (isTemporary(contentsOfAReg))
-	//{
-	//	//freeTemp();
-	//	contentsOfAReg = "";
-	//}
-	//else if (isTemporary(operand1) && contentsOfAReg != operand1)
-	//	freeTemp();
-	//else if (isTemporary(operand2) && contentsOfAReg != operand2)
-	//	freeTemp();
-    //contentsOfAReg = getTemp();
-    //symbolTable.at(contentsOfAReg).setDataType(INTEGER);
-    //pushOperand(contentsOfAReg);
+	cout << "operand1: " << operand1 << "    operand2: " << operand2 << endl;
+	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
+		processError("incompatible types");
+	if (isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+	{
+		emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
+		symbolTable.at(contentsOfAReg).setAlloc(YES);
+		contentsOfAReg = "";
+	}
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))
+       contentsOfAReg = "";
+	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
+	{
+		emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue());
+		contentsOfAReg = operand2;
+	}
+	if (contentsOfAReg == operand1)
+		emit(" ", "add", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + symbolTable.at(operand1).getValue() + " + " + symbolTable.at(operand2).getValue());
+	else if (contentsOfAReg == operand2)
+		emit(" ", "add", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + symbolTable.at(operand2).getValue() + " + " + symbolTable.at(operand1).getValue());
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
+	if (isTemporary(contentsOfAReg))
+	{
+		freeTemp();
+		contentsOfAReg = "";
+	}
+    contentsOfAReg = getTemp();
+    symbolTable.at(contentsOfAReg).setDataType(INTEGER);
+    pushOperand(contentsOfAReg);
 }
 
 void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -  op1
@@ -1096,6 +1095,7 @@ void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -
 
 void Compiler::emitMultiplicationCode(string operand1, string operand2) // op2 *  op1
 {
+	cout << "operand1: " << operand1 << "\noperand2: " << operand2 << endl;
 	if (symbolTable.at(operand1).getDataType() != INTEGER || symbolTable.at(operand2).getDataType() != INTEGER)
 		processError("incompatible types");
 	if (isTemporary(contentsOfAReg) && contentsOfAReg != operand2)
@@ -1113,18 +1113,18 @@ void Compiler::emitMultiplicationCode(string operand1, string operand2) // op2 *
 	}
 	if (contentsOfAReg == operand2)
 		emit(" ", "imul", "dword [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand2 + " times " + operand1);
-	else
+	else if (contentsOfAReg == operand2)
 		emit(" ", "imul", "dword [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand1 + " times " + operand2); 
-	cout << "contents of AReg: " << contentsOfAReg << "    operand1: " << operand1 << "   operand2: "<< operand2 << endl;
+
+	if (isTemporary(operand1) && contentsOfAReg != operand1)
+		freeTemp();
+	if (isTemporary(operand2) && contentsOfAReg != operand2)
+		freeTemp();
 	if (isTemporary(contentsOfAReg))
 	{
 		freeTemp();
 		contentsOfAReg = "";
 	}
-	else if (isTemporary(operand1) && contentsOfAReg != operand1)
-		freeTemp();
-	else if (isTemporary(operand2) && contentsOfAReg != operand2)
-		freeTemp();
    contentsOfAReg = getTemp();
    symbolTable.at(contentsOfAReg).setDataType(INTEGER);
    pushOperand(contentsOfAReg);
