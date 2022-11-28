@@ -799,7 +799,7 @@ void Compiler::pushOperand(string operand)
 {
 	map<string, SymbolTableEntry>::iterator itr;
 	itr = symbolTable.find(operand.substr(0,15));
-	if (isLiteral(operand) && itr == symbolTable.end())
+	if (isLiteral(operand) && itr != symbolTable.end())
 	{
 		if (operand == "true")
 		{
@@ -822,8 +822,8 @@ void Compiler::pushOperand(string operand)
 			}
 		}
 	}
-	//else                                                                                    // unsure
-	//	insert(operand, whichType(operand), CONSTANT, whichValue(operand), YES, 1);           // unsure
+	else if (itr == symbolTable.end())                                                                            // unsure
+		insert(operand, whichType(operand), CONSTANT, whichValue(operand), YES, 1);           // unsure
 	
 	
 	cout << "pushOperand: " << operand << endl;
