@@ -717,7 +717,7 @@ string Compiler::whichValue(string name) //tells which value a name has
 	if (isLiteral(name))
 		value = name;
 	else
-		if (itr != symbolTable.end() && itr->second.getValue() != "")         //getInternalName(symbolTable[name]) != NULL && getValue(symbolTable[name]) != NULL)	//name is an identifier and hopefully a constant
+		if (itr != symbolTable.end() /*&& itr->second.getValue() != ""*/)         //getInternalName(symbolTable[name]) != NULL && getValue(symbolTable[name]) != NULL)	//name is an identifier and hopefully a constant
 			value = itr->second.getValue();
 		else
 		{
@@ -822,8 +822,8 @@ void Compiler::pushOperand(string operand)
 			}
 		}
 	}
-	else
-		insert(operand, whichType(operand), CONSTANT, whichValue(operand), YES, 1);
+	//else                                                                                    // unsure
+	//	insert(operand, whichType(operand), CONSTANT, whichValue(operand), YES, 1);           // unsure
 	
 	
 	cout << "pushOperand: " << operand << endl;
@@ -1714,6 +1714,12 @@ string Compiler::nextToken() // GTG
 		{
 			token = ch;
 			nextChar();
+			if (ch == '=')
+			{
+				token += ch;
+				nextChar();
+			}
+			
 		}
 		else if (islower(ch)) 	// case islower
 		{
