@@ -5,7 +5,7 @@
 
 //fix not, and, or
 
-#include <stage1.h>
+#include <stage2.h>
 #include <cctype> //needed for lexical functions
 #include <iomanip> // needed for emit functions (setw())
 #include <time.h> // needed for emit prologue
@@ -134,7 +134,8 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 	string temp = token;
 	nextToken();
 	//code("end", temp);
-	code(temp);
+	if (temp == ".")
+		code(temp);
 }
 
 void Compiler::constStmts() //token should be NON_KEY_ID GTG
@@ -617,8 +618,8 @@ void Compiler::whileStmt()
 	nextToken();
 	execStmt();
 	
-	opand1 = popOperand();					 // gen format code call
-	opand2 = popOperand();					 // gen format code call
+	string opand1 = popOperand();					 // gen format code call
+	string opand2 = popOperand();					 // gen format code call
 	code("post_while", opand1, opand2);	 // gen format code call post while
 }
 void Compiler::repeatStmt()
@@ -637,8 +638,8 @@ void Compiler::repeatStmt()
 	nextToken();
 	express();
 	
-	opand1 = popOperand();					 // gen format code call
-	opand2 = popOperand();					 // gen format code call
+	string opand1 = popOperand();					 // gen format code call
+	string opand2 = popOperand();					 // gen format code call
 	code("until", opand1, opand2);	 // gen format code call post while
 	
 	if (token != ";")
@@ -898,13 +899,11 @@ void Compiler::code(string op, string operand1, string operand2)
 	else if (op == "do")
 		emitDoCode(operand1, operand2);
 	else if (op == "post_while")
-		emitPostWhileCode(operand1, operand2)
+		emitPostWhileCode(operand1, operand2);
 	else if (op == "repeat")
 		emitRepeatCode(operand1, operand2);
 	else if (op == "until")
 		emitUntilCode(operand1, operand2);
-	else if (op == ";")
-		//nullstmt
 	else
 		processError("compiler error since function code should not be called with illegal arguments");
 }
@@ -1918,27 +1917,27 @@ void Compiler::emitGreaterThanOrEqualToCode(string operand1, string operand2) //
 }
 
 // Emit functions for Stage 2
-void Compiler::emitThenCode(string operand1, string = "")
+void Compiler::emitThenCode(string operand1, string operand2)
 // emit code which follows 'then' and statement predicate
 {
 
 }
-void Compiler::emitElseCode(string operand1, string = "")
+void Compiler::emitElseCode(string operand1, string operand2)
 // emit code which follows 'else' clause of 'if' statement
 {
 
 }
-void Compiler::emitPostIfCode(string operand1, string = "")
+void Compiler::emitPostIfCode(string operand1, string operand2)
 // emit code which follows end of 'if' statement
 {
 
 }
-void Compiler::emitWhileCode(string = "", string = "")
+void Compiler::emitWhileCode(string operand1, string operand2)
 {
 
 }
 // emit code following 'while'
-void Compiler::emitDoCode(string operand1, string = "")
+void Compiler::emitDoCode(string operand1, string operand2)
 {
 
 }
@@ -1950,7 +1949,7 @@ void Compiler::emitPostWhileCode(string operand1, string operand2)
 {
 
 }
-void Compiler::emitRepeatCode(string = "", string = "")
+void Compiler::emitRepeatCode(string operand1, string operand2)
 // emit code which follows 'repeat'
 {
 
