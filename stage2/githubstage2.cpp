@@ -128,8 +128,8 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 			processError("\"end\" expected -- beginEndStmt");
 		}
 	}
-
-	if (nextToken() != "." || nextToken() != ";") // does this need to do anything special for stage2? yeah we need to keep track of how many begin stmts we have
+	nextToken();
+	if (token != "." && token != ";") // does this need to do anything special for stage2? yeah we need to keep track of how many begin stmts we have
 		processError("period expected or semicolon -- beginEndStmt");
 	string temp = token;
 	nextToken();
@@ -597,8 +597,6 @@ void Compiler::elsePt()
 		execStmt();
 		code("post_if", popOperand());
 	}
-	else
-		code("post_if", popOperand());
 }
 void Compiler::whileStmt()
 {
@@ -867,7 +865,7 @@ string Compiler::whichValue(string name) //tells which value a name has
 void Compiler::code(string op, string operand1, string operand2)
 {
 	cout<< "code::::::::: operator = " << op << "   operand1 = " << operand1 << "   operand2 = " << operand2 << endl;
-	emit(op);
+	//emit(op);
 	if (op == "program")
 		emitPrologue(operand1);
 	else if (op == ".")
@@ -1937,7 +1935,7 @@ void Compiler::emitGreaterThanOrEqualToCode(string operand1, string operand2) //
 }
 
 // Emit functions for Stage 2
-void emitThenCode(string operand1, string = "")
+void Compiler::emitThenCode(string operand1, string operand2)
 {
 	string tempLabel;
 	if (symbolTable.at(operand1).getDataType() != BOOLEAN)
@@ -1953,7 +1951,7 @@ void emitThenCode(string operand1, string = "")
 	contentsOfAReg = "";
 }
 
-void emitElseCode(string operand1, string = "")
+void Compiler::emitElseCode(string operand1, string operand2)
 {
 	string tempLabel = getLabel();
 	emit("", "jmp", tempLabel  , "; unconditionally jump");
@@ -1962,13 +1960,13 @@ void emitElseCode(string operand1, string = "")
 	contentsOfAReg = "";
 }
 
-void emitPostIfCode(string operand1, string = "")
+void Compiler::emitPostIfCode(string operand1, string operand2)
 {
 	emit(operand1 + ":");
 	contentsOfAReg = "";
 }
 
-void emitWhileCode(string = "", string = "")
+void Compiler::emitWhileCode(string operand1, string operand2)
 {
 	string tempLabel = getLabel();
 	emit(operand1 + ":");
@@ -1976,7 +1974,7 @@ void emitWhileCode(string = "", string = "")
 	contentsOfAReg = "";
 }
 
-void emitDoCode(string operand1, string = "")
+void Compiler::emitDoCode(string operand1, string operand2)
 {
 	string tempLabel;
 	if (symbolTable.at(operand1).getDataType() != BOOLEAN)
@@ -1992,14 +1990,14 @@ void emitDoCode(string operand1, string = "")
 	contentsOfAReg = "";
 }
 
-void emitPostWhileCode(string operand1, string operand2)
+void Compiler::emitPostWhileCode(string operand1, string operand2)
 {
 	emit("", "jmp", operand2, "; unconditionally jump");
 	emit(operand1 + ":");
 	contentsOfAReg = "";
 }
 
-void emitRepeatCode(string = "", string = "")
+void Compiler::emitRepeatCode(string operand1, string operand2)
 {
 	string tempLabel = getLabel();
 	emit(operand1 + ":");
@@ -2007,7 +2005,7 @@ void emitRepeatCode(string = "", string = "")
 	contentsOfAReg = "";
 }
 
-void emitUntilCode(string operand1, string operand2)
+void Compiler::emitUntilCode(string operand1, string operand2)
 {
 	if (symbolTable.at(operand1).getDataType() != BOOLEAN)
 		processError("if predicate must be of type boolean");
