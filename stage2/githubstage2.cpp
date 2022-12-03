@@ -1677,7 +1677,7 @@ void Compiler::emitInequalityCode(string operand1, string operand2)     // op2 !
 
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
 	{
-		emit("", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg <> " + operand2);
+		emit("", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg = " + operand2);
 		contentsOfAReg = operand2;
 	}
 
@@ -1733,7 +1733,7 @@ void Compiler::emitLessThanCode(string operand1, string operand2)       // op2 <
 
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
 	{
-		emit("", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg < " + operand2);
+		emit("", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg = " + operand2);
 		contentsOfAReg = operand2;
 	}
 
@@ -1789,7 +1789,7 @@ void Compiler::emitLessThanOrEqualToCode(string operand1, string operand2) // op
 
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
 	{
-		emit("", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg <= " + operand2);
+		emit("", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg = " + operand2);
 		contentsOfAReg = operand2;
 	}
 
@@ -1844,7 +1844,7 @@ void Compiler::emitGreaterThanCode(string operand1, string operand2)    // op2 >
 
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
 	{
-		emit("", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg > " + operand2);
+		emit("", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg = " + operand2);
 		contentsOfAReg = operand2;
 	}
 
@@ -1899,7 +1899,7 @@ void Compiler::emitGreaterThanOrEqualToCode(string operand1, string operand2) //
 
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
 	{
-		emit("", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg >= " + operand2);
+		emit("", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg = " + operand2);
 		contentsOfAReg = operand2;
 	}
 
