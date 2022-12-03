@@ -1156,12 +1156,12 @@ void Compiler::emitAssignCode(string operand1, string operand2)         // op2 =
 		processError("symbol on left-hand side of assignment must have a storage mode of VARIABLE");
 	if (operand1 == operand2)
 		return;
-	//cout << "fuck" << endl;
+
 	if (operand1 != contentsOfAReg)
 	{
 		if (whichValue(operand1) == "-1" || whichValue(operand1) == "0")
 		{
-			emit(" ", "mov", "eax,[" + symbolTable.at(operand1).getValue() + "]", "; 111 store eax in" + operand1);
+			emit(" ", "mov", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; AReg = " + symbolTable.at(operand1).getValue());
 			contentsOfAReg = operand1;
 		}
 		else
@@ -1170,11 +1170,11 @@ void Compiler::emitAssignCode(string operand1, string operand2)         // op2 =
 			contentsOfAReg = operand1;
 		}
 	}
-	//cout << "fuck" << endl;
+
 	//
 	emit(" ", "mov", "[" + symbolTable.at(operand2).getInternalName() + "],eax", "; " + operand2 + " = AReg");	// mov	eax, [operand1's inName]
 	contentsOfAReg = operand2;
-	//cout << "fuck" << endl;
+
 
 	if (isTemporary(operand1))
 		freeTemp();
