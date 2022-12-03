@@ -1,8 +1,6 @@
 //Gavin Whitson & Josh Strickland
 //CS 4301
-//Stage 1
-
-//fix whichType() -- fuk this wip
+//Stage 2
 
 
 //fix not, and, or
@@ -570,6 +568,26 @@ void Compiler::part()           // stage 1, production 15
 	cout<< "part found: " << token << " -- part closed"<< endl;
 }
 
+void ifStmt()
+{
+	
+}
+void elsePt()
+{
+	
+}
+void whileStmt()
+{
+	
+}
+void repeatStmt()
+{
+	
+}
+void nullStmt()
+{
+	
+}
 
 //HELPER FUNCTIONS
 bool Compiler::isKeyword(string s) const // GTG
@@ -1822,6 +1840,44 @@ void Compiler::emitGreaterThanOrEqualToCode(string operand1, string operand2) //
 	contentsOfAReg = getTemp();
 	symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
 	pushOperand(contentsOfAReg);
+}
+
+// Emit functions for Stage 2
+void emitThenCode(string operand1, string = "")
+// emit code which follows 'then' and statement predicate
+{
+}
+void emitElseCode(string operand1, string = "")
+// emit code which follows 'else' clause of 'if' statement
+{
+}
+void emitPostIfCode(string operand1, string = "")
+// emit code which follows end of 'if' statement
+{
+}
+void emitWhileCode(string = "", string = "")
+{
+}
+// emit code following 'while'
+void emitDoCode(string operand1, string = "")
+{
+}
+// emit code following 'do'
+void emitPostWhileCode(string operand1, string operand2)
+// emit code at end of 'while' loop;
+// operand2 is the label of the beginning of the loop
+// operand1 is the label which should follow the end of the loop
+{
+}
+void emitRepeatCode(string = "", string = "")
+// emit code which follows 'repeat'
+{
+}
+void emitUntilCode(string operand1, string operand2)
+// emit code which follows 'until' and the predicate of loop
+// operand1 is the value of the predicate
+// operand2 is the label which points to the beginning of the loop
+{
 }
 
 //LEXICAL ROUTINES
