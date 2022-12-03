@@ -1944,7 +1944,7 @@ void Compiler::emitThenCode(string operand1, string operand2)
 	if (operand1 != contentsOfAReg)
 		emit("", "mov", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; AReg = " + operand1);                           //
 	emit("", "cmp", "eax,0", "; compare eax to 0");
-	emit("", "je", tempLabel, "; if " + tempLabel + " is false then jump to end of if");
+	emit("", "je", tempLabel, "; if " + operand1 + " is false then jump to end of if");
 	pushOperand(tempLabel);
 	if (isTemporary(operand1))
 		freeTemp();
@@ -1954,7 +1954,7 @@ void Compiler::emitThenCode(string operand1, string operand2)
 void Compiler::emitElseCode(string operand1, string operand2)
 {
 	string tempLabel = getLabel();
-	emit("", "jmp", tempLabel  , "; unconditionally jump");
+	emit("", "jmp", tempLabel  , "; jump to end if");
 	emit(operand1 + ":", "", "", "; else");
 	pushOperand(tempLabel);
 	contentsOfAReg = "";
@@ -1962,14 +1962,14 @@ void Compiler::emitElseCode(string operand1, string operand2)
 
 void Compiler::emitPostIfCode(string operand1, string operand2)
 {
-	emit(operand1 + ":");
+	emit(operand1 + ":", "", "", "; end if");
 	contentsOfAReg = "";
 }
 
 void Compiler::emitWhileCode(string operand1, string operand2)
 {
 	string tempLabel = getLabel();
-	emit(operand1 + ":");
+	emit(tempLabel + ":", "", "", "; while");
 	pushOperand(tempLabel);
 	contentsOfAReg = "";
 }
@@ -1983,7 +1983,7 @@ void Compiler::emitDoCode(string operand1, string operand2)
 	if (operand1 != contentsOfAReg)
 		emit("", "mov", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; AReg = " + operand1);                           //
 	emit("", "cmp", "eax,0", "; compare eax to 0");
-	emit("", "je", tempLabel, "; if " + tempLabel + " is false then jump to end of if");
+	emit("", "je", tempLabel, "; if " + operand1 + " is false then jump to end while");
 	pushOperand(tempLabel);
 	if (isTemporary(operand1))
 		freeTemp();
@@ -1992,7 +1992,7 @@ void Compiler::emitDoCode(string operand1, string operand2)
 
 void Compiler::emitPostWhileCode(string operand1, string operand2)
 {
-	emit("", "jmp", operand1, "; end while");
+	emit("", "jmp", operand2, "; end while");
 	emit(operand1 + ":");
 	contentsOfAReg = "";
 }
@@ -2012,7 +2012,7 @@ void Compiler::emitUntilCode(string operand1, string operand2)
 	if (operand1 != contentsOfAReg)
 		emit("", "mov", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; AReg = " + operand1);                           //
 	emit("", "cmp", "eax,0", "; compare eax to 0");
-	emit("", "je", operand2, "; if " + operand2 + " is false then jump to end of if");
+	emit("", "je", operand2, "; if " + operand2 + " is false then jump to end of until");
 	if (isTemporary(operand1))
 		freeTemp();
 	contentsOfAReg = "";
