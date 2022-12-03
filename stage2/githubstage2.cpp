@@ -2000,7 +2000,7 @@ void Compiler::emitPostWhileCode(string operand1, string operand2)
 void Compiler::emitRepeatCode(string operand1, string operand2)
 {
 	string tempLabel = getLabel();
-	emit(operand1 + ":");
+	emit(tempLabel + ":", "", "", "; repeat");
 	pushOperand(tempLabel);
 	contentsOfAReg = "";
 }
