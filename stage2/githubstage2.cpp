@@ -1992,7 +1992,7 @@ void Compiler::emitDoCode(string operand1, string operand2)
 
 void Compiler::emitPostWhileCode(string operand1, string operand2)
 {
-	emit("", "jmp", operand2, "; unconditionally jump");
+	emit("", "jmp", operand1, "; end while");
 	emit(operand1 + ":");
 	contentsOfAReg = "";
 }
