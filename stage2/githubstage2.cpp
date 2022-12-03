@@ -2012,7 +2012,7 @@ void Compiler::emitUntilCode(string operand1, string operand2)
 	if (operand1 != contentsOfAReg)
 		emit("", "mov", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; AReg = " + operand1);                           //
 	emit("", "cmp", "eax,0", "; compare eax to 0");
-	emit("", "je", operand2, "; if " + operand2 + " is false then jump to end of until");
+	emit("", "je", operand2, "; until " + symbolTable.at(operand1).getInternalName() + " is true");
 	if (isTemporary(operand1))
 		freeTemp();
 	contentsOfAReg = "";
