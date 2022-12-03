@@ -226,7 +226,7 @@ string Compiler::ids() //token should be NON_KEY_ID GTG
 void Compiler::execStmts()      // stage 1, production 2
 {
 	string x, y, z;																		  //useless rn
-	if (token == "read" || token == "write" || isNonKeyId(token))						  //if its read, write, or a non key ID. go into execStmts, otherwise it should do nothing
+	if (token == "read" || token == "write" || isNonKeyId(token) || token == "if" || token == "while" || token == "repeat" || token == ";" || token == "begin")						  //if its read, write, or a non key ID. go into execStmts, otherwise it should do nothing
 	{																					  //
 		execStmt();																		  //
 		//execStmts();			// make this indirectly recursive from execStmt			  //
@@ -273,7 +273,7 @@ void Compiler::execStmt()       // stage 1, production 3								  //
 }
 void Compiler::assignStmt()     // stage 1, production 4								  //
 {																						  //                                                                               // i feel like i need to rewrite this now
-	cout<< "assignStmt" << endl;
+	//cout<< "assignStmt" << endl;
 	if (isNonKeyId(token))																  //redundant but never hurts, opens possibility to throw special error too        // i feel like i need to rewrite this now
 	{																					  //                                                                               // i feel like i need to rewrite this now
 		pushOperand(token);
@@ -303,11 +303,11 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 	else                                                                                                                                                                   // i feel like i need to rewrite this now
 		processError("how did you get here? -- assignStmt");                                                                                                               // i feel like i need to rewrite this now
 
-	cout<< "assignStmt close" << endl;
+	//cout<< "assignStmt close" << endl;
 }
 void Compiler::readStmt()       // stage 1, production 5, production 6 (readList) is included in the code for this one
 {
-	cout<< "readStmt" << endl;
+	//cout<< "readStmt" << endl;
 	if (token != "read")                                                                  //
 		processError("read expected -- readStmt");                                        //hella redundant
 	nextToken();                                                                          //
@@ -322,11 +322,11 @@ void Compiler::readStmt()       // stage 1, production 5, production 6 (readList
 	nextToken();                                                                          //
 	if (token != ";")                                                                     //semicolon at the end of this part
 		processError("\';\' expected -- readStmt");                                       //
-	cout<< "readStmt close" << endl;
+	//cout<< "readStmt close" << endl;
 }
 void Compiler::writeStmt()      // stage 1, production 7, 8's code is included here
 {
-	cout<< "writeStmt" << endl;
+	//cout<< "writeStmt" << endl;
 	if (token != "write")
 		processError("write expected -- writeStmt");                                      // these seem the exact same...
 	nextToken();                                                                          // these seem the exact same...
@@ -341,7 +341,7 @@ void Compiler::writeStmt()      // stage 1, production 7, 8's code is included h
 	nextToken();                                                                          // these seem the exact same...
 	if (token != ";")                                                                     // these seem the exact same...
 		processError("\';\' expected -- writeStmt");                                      // these seem the exact same...
-	cout<< "writeStmt close with" << token << endl;
+	//cout<< "writeStmt close with" << token << endl;
 }
 void Compiler::express()        // stage 1, production 9
 {                                                                                                                         //these will probably be heavy on the stack shit
@@ -349,11 +349,11 @@ void Compiler::express()        // stage 1, production 9
 	//takes in some token -- prodcutions calling this should call nextToken before this production                        //these will probably be heavy on the stack shit
 	term();                                                                                                               //these will probably be heavy on the stack shit
 	expresses();
-	cout<< "express close with " << token << endl;
+	//cout<< "express close with " << token << endl;
 }
 void Compiler::expresses()      // stage 1, production 10
 {
-	cout<< "expresses" << endl;
+	//cout<< "expresses" << endl;
 	if (token == "=" || token == "<>" || token == "<=" || token == ">=" || token == "<" || token == ">")
 	{
 		string opand1, opand2, oper;
@@ -378,23 +378,23 @@ void Compiler::expresses()      // stage 1, production 10
 		//
 		//}
 	}
-	cout<< "expresses close with " << token << endl;
+	//cout<< "expresses close with " << token << endl;
 }
 void Compiler::term()           // stage 1, production 11
 {
-	cout<< "term" << endl;
+	//cout<< "term" << endl;
 	//assuming this also takes in some token grabbed by previous production
 	factor();
 	//nextToken();
 	cout<< "nextToken in term" << endl;
 	terms();
 
-	cout<< "term close with " << token << endl;
+	//cout<< "term close with " << token << endl;
 
 }
 void Compiler::terms()          // stage 1, production 12
 {
-	cout<< "terms" << endl;
+	//cout<< "terms" << endl;
 	if (token == "+" || token == "-" || token == "or")
 	{
 		string opand1, opand2;
@@ -411,20 +411,20 @@ void Compiler::terms()          // stage 1, production 12
 		terms();
 	}
 
-	cout<< "terms close with " << token << endl;
+	//cout<< "terms close with " << token << endl;
 }
 void Compiler::factor()         // stage 1, production 13
 {
-	cout<< "factor" << endl;
+	//cout<< "factor" << endl;
 	//assuming this ALSO takes in some token from a prior production
 	//add some checking
 	part();
 	factors();
-	cout<< "factor closed with"  << token << endl;
+	//cout<< "factor closed with"  << token << endl;
 }
 void Compiler::factors()        // stage 1, production 14
 {
-	cout<< "factors" << endl;
+	//cout<< "factors" << endl;
 	string temp = token;
 	if (token == "*" || token == "div" || token == "mod" || token == "and")
 	{
@@ -442,11 +442,11 @@ void Compiler::factors()        // stage 1, production 14
 
 		factors();
 	}
-	cout<< "factors close with " << token << endl;
+	//cout<< "factors close with " << token << endl;
 }
 void Compiler::part()           // stage 1, production 15
 {
-	cout<< "part" << endl;
+	//cout<< "part" << endl;
 	if (token == "not")                                                                                                                            //   NOT SECTION
 	{                                                                                                                                              //
 	cout << "not" << endl;
@@ -569,7 +569,7 @@ void Compiler::part()           // stage 1, production 15
 	else                                                                                                                                           //
 		processError("fail in part");                                                                                                              //
 
-	cout<< "part found: " << token << " -- part closed"<< endl;
+	//cout<< "part found: " << token << " -- part closed"<< endl;
 }
 
 void Compiler::ifStmt()
@@ -602,13 +602,28 @@ void Compiler::elsePt()
 }
 void Compiler::whileStmt()
 {
+	cout << "here" << endl;
 	if (token != "while")
 		processError("\"while\" expected in while stmt");
 	
 	code("while");
 	
-	nextToken();
-	express();
+	nextToken();                   //tag
+	
+	if (token == "(")                                                                                                                   
+	{
+		cout << "here" << endl;
+		nextToken();
+		express();
+		if (token != ")")                                                  
+			processError("\')\' expected -- part ugh .. this is the not section");
+		nextToken();
+	}
+	else
+		express();
+	
+	cout << "there  -- token = " << token << endl;
+	
 	
 	if (token != "do")
 		processError("\"do\" expected in while stmt");
@@ -852,6 +867,7 @@ string Compiler::whichValue(string name) //tells which value a name has
 void Compiler::code(string op, string operand1, string operand2)
 {
 	cout<< "code::::::::: operator = " << op << "   operand1 = " << operand1 << "   operand2 = " << operand2 << endl;
+	emit(op);
 	if (op == "program")
 		emitPrologue(operand1);
 	else if (op == ".")
@@ -896,6 +912,10 @@ void Compiler::code(string op, string operand1, string operand2)
 		emitGreaterThanOrEqualToCode(operand1, operand2);
 	else if (op == "post_if")
 		emitPostIfCode(operand1, operand2);
+	else if (op == "then")
+		emitThenCode(operand1, operand2);
+	else if (op == "while")
+		emitWhileCode(operand1, operand2);
 	else if (op == "do")
 		emitDoCode(operand1, operand2);
 	else if (op == "post_while")
@@ -910,7 +930,7 @@ void Compiler::code(string op, string operand1, string operand2)
 
 void Compiler::pushOperator(string op)
 {
-	cout<< "pushOperator: " << op << endl;
+	//cout<< "pushOperator: " << op << endl;
 	operatorStk.push(op);
 }
 
@@ -924,7 +944,7 @@ string Compiler::popOperator()
 	}
 	else
 	{
-		cout<< "compiler error; operator stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
+		//cout<< "compiler error; operator stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
 		processError("compiler error; operator stack underflow");
 	}
 	return stackStr;
@@ -968,7 +988,7 @@ string Compiler::popOperand()
 	}
 	else
 	{
-		cout<< "compiler error; operand stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
+		//cout<< "compiler error; operand stack underflow\nLine: " << lineNo << "\nToken: " << token << endl;
 		processError("compiler error; operand stack underflow");
 	}
 	return stackStr;
@@ -1068,7 +1088,7 @@ void Compiler::emitReadCode(string operand, string operand2)
 		}
 		else
 		{
-			cout<< "Name: " << name << endl;
+			//cout<< "Name: " << name << endl;
 			processError("reference to undefined symbol");
 		}
 		if (itr->second.getDataType() != INTEGER)
@@ -1111,7 +1131,7 @@ void Compiler::emitWriteCode(string operand, string operand2)
 		}
 		else
 		{
-			cout<< "Name: " << name << endl;
+			//cout<< "Name: " << name << endl;
 			processError("reference to undefined symbol");
 		}
 		if (itr->first != contentsOfAReg)
@@ -1127,18 +1147,18 @@ void Compiler::emitWriteCode(string operand, string operand2)
 
 void Compiler::emitAssignCode(string operand1, string operand2)         // op2 = op1
 {
-	cout<< whichType(operand1) << endl;
-	cout<< "through con" << endl;
-	cout<< whichType(operand2) << endl;
-	cout<< "through con" << endl;
-	cout<< whichType(operand1) << " - operand1 - " << operand1 << "     -     " << whichType(operand2) << " - operand2 " << operand2 << endl;
+	//cout<< whichType(operand1) << endl;
+	//cout<< "through con" << endl;
+	//cout<< whichType(operand2) << endl;
+	//cout<< "through con" << endl;
+	//cout<< whichType(operand1) << " - operand1 - " << operand1 << "     -     " << whichType(operand2) << " - operand2 " << operand2 << endl;
 	if (whichType(operand1) != whichType(operand2))
 		processError("incompatible types - assign");
 	if (symbolTable.at(operand2).getMode() != VARIABLE)
 		processError("symbol on left-hand side of assignment must have a storage mode of VARIABLE");
 	if (operand1 == operand2)
 		return;
-	cout << "fuck" << endl;
+	//cout << "fuck" << endl;
 	if (operand1 != contentsOfAReg)
 	{
 		if (whichValue(operand1) == "-1" || whichValue(operand1) == "0")
@@ -1152,11 +1172,11 @@ void Compiler::emitAssignCode(string operand1, string operand2)         // op2 =
 			contentsOfAReg = operand1;
 		}
 	}
-	cout << "fuck" << endl;
+	//cout << "fuck" << endl;
 	//
 	emit(" ", "mov", "[" + symbolTable.at(operand2).getInternalName() + "],eax", "; " + operand2 + " = AReg");	// mov	eax, [operand1's inName]
 	contentsOfAReg = operand2;
-	cout << "fuck" << endl;
+	//cout << "fuck" << endl;
 
 	if (isTemporary(operand1))
 		freeTemp();
@@ -1175,7 +1195,7 @@ void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +
 	operand2 = operand2.substr(0,15);
 
 	//emit(contentsOfAReg, operand1, operand2);
-	cout<< "operand1: " << operand1 << "    operand2: " << operand2 << endl;
+	//cout<< "operand1: " << operand1 << "    operand2: " << operand2 << endl;
 
 	if (whichType(operand1) != INTEGER || whichType(operand2) != INTEGER)                                                               //
 		processError("incompatible types");                                                                                             //
@@ -1217,7 +1237,7 @@ void Compiler::emitAdditionCode(string operand1, string operand2)       // op2 +
 	//	contentsOfAReg = "";                                                                                                            //
 	//}                                                                                                                                 //
     contentsOfAReg = getTemp();                                                                                                         //
-	cout<< "emit addition -- contents of AReg = " << contentsOfAReg << endl;                                                                            //
+	//cout<< "emit addition -- contents of AReg = " << contentsOfAReg << endl;                                                                            //
     symbolTable.at(contentsOfAReg).setDataType(INTEGER);                                                                                //
     pushOperand(contentsOfAReg);                                                                                                        //
 }
@@ -1261,9 +1281,9 @@ void Compiler::emitSubtractionCode(string operand1, string operand2)    // op2 -
 		freeTemp();
 	// A Register = next available temporary name and change type of its symbol table entry to integer
 	contentsOfAReg = getTemp();
-	cout<< endl << "hih " << currentTempNo << " " <<  contentsOfAReg << endl;
+	//cout<< endl << "hih " << currentTempNo << " " <<  contentsOfAReg << endl;
 	symbolTable.at(contentsOfAReg).setDataType(INTEGER);
-	cout<< endl << "hih" << endl;
+	//cout<< endl << "hih" << endl;
 	// push the name of the result onto operandStk
 	operandStk.push(contentsOfAReg);
 }
@@ -1313,7 +1333,7 @@ void Compiler::emitDivisionCode(string operand1, string operand2)       // op2 /
 
 void Compiler::emitMultiplicationCode(string operand1, string operand2) // op2 *  op1
 {
-	cout<< "operand1: " << operand1 << "    operand2: " << operand2 << endl;                                                           //
+	//cout<< "operand1: " << operand1 << "    operand2: " << operand2 << endl;                                                           //
 	if (whichType(operand1) != INTEGER || whichType(operand2) != INTEGER)                                                               //
 		processError("incompatible types");                                                                                             //
 	if (isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))                                      //
@@ -1346,7 +1366,7 @@ void Compiler::emitMultiplicationCode(string operand1, string operand2) // op2 *
 	//}                                                                                                                                 //
 	//emit("","contentsOfAReg = ",contentsOfAReg,"");
     contentsOfAReg = getTemp();                                                                                                         //
-	cout<< "emit addition -- contents of AReg = " << contentsOfAReg << endl;                                                                            //
+	//cout<< "emit addition -- contents of AReg = " << contentsOfAReg << endl;                                                                            //
     symbolTable.at(contentsOfAReg).setDataType(INTEGER);                                                                                //
     pushOperand(contentsOfAReg);
 }
@@ -2070,12 +2090,12 @@ string Compiler::nextToken() // GTG
 			token = ch;
 		else
 		{
-			cout<< int(ch) << endl;
+			//cout<< int(ch) << endl;
 			processError("illegal symbol -- nextToken");
 		}
 	}
 	token = token.substr(0, 15);
-	//cout<< "token = " << token << "    -- nextToken" << endl;
+	cout<< "token = " << token << "    -- nextToken" << endl;
 	return token;
 }
 //OTHER ROUTINES
@@ -2107,11 +2127,11 @@ string Compiler::genInternalName(storeTypes stype) const //GTG
 
 void Compiler::processError(string err) // GTG
 {
-	listingFile << endl << "Error: Line " << lineNo << ": " << err << endl << endl;
+	listingFile << endl << "Error: Line " << lineNo << ": " << err  << "\n\n\\ntoken = " << token<< endl << endl;
 	errorCount++;
 	cout<< endl << "Error: Line " << lineNo << ": " << err << endl << endl;	// debug
 
-	cout<< "opandstk size = " << operandStk.size() << endl;
+	//cout<< "opandstk size = " << operandStk.size() << endl;
 	//for (uint i = 0 ; i < operandStk.size(); i++)
 	//{
 	//	cout<< "operandStk[" <<i << "] = "<< operandStk.top() << endl;
