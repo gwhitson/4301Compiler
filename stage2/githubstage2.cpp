@@ -1937,10 +1937,20 @@ void Compiler::emitGreaterThanOrEqualToCode(string operand1, string operand2) //
 }
 
 // Emit functions for Stage 2
-void Compiler::emitThenCode(string operand1, string operand2)
-// emit code which follows 'then' and statement predicate
+void emitThenCode(string operand1, string = "")
 {
-
+	string tempLabel;
+	if (symbolTable.at(opand1).getDataType() != BOOLEAN)
+		processError("if predicate must be of type boolean");
+	tempLabel = getLabel();
+	if (operand1 != contentsOfAReg)
+		emit("", "mov", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; AReg = " + operand1);                           //
+	emit("", "cmp", "eax,0", "; compare eax to 0");
+	emit("", "je", tempLabel, "; if " + tempLabel + " is false then jump to end of if");
+	pushOperand(tempLabel);
+	if (isTemporary(operand1))
+		freeTemp();
+	contentsOfAReg = "";
 }
 void Compiler::emitElseCode(string operand1, string operand2)
 // emit code which follows 'else' clause of 'if' statement
