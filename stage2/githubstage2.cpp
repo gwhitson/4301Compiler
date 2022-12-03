@@ -1940,7 +1940,7 @@ void Compiler::emitGreaterThanOrEqualToCode(string operand1, string operand2) //
 void emitThenCode(string operand1, string = "")
 {
 	string tempLabel;
-	if (symbolTable.at(opand1).getDataType() != BOOLEAN)
+	if (symbolTable.at(operand1).getDataType() != BOOLEAN)
 		processError("if predicate must be of type boolean");
 	tempLabel = getLabel();
 	if (operand1 != contentsOfAReg)
@@ -1952,44 +1952,72 @@ void emitThenCode(string operand1, string = "")
 		freeTemp();
 	contentsOfAReg = "";
 }
-void Compiler::emitElseCode(string operand1, string operand2)
-// emit code which follows 'else' clause of 'if' statement
-{
 
+void emitElseCode(string operand1, string = "")
+{
+	string tempLabel = getLabel();
+	emit("", "jmp", tempLabel  , "; unconditionally jump");
+	emit(operand1 + ":", "", "", "; else");
+	pushOperand(tempLabel);
+	contentsOfAReg = "";
 }
-void Compiler::emitPostIfCode(string operand1, string operand2)
-// emit code which follows end of 'if' statement
-{
 
+void emitPostIfCode(string operand1, string = "")
+{
+	emit(operand1 + ":");
+	contentsOfAReg = "";
 }
-void Compiler::emitWhileCode(string operand1, string operand2)
-{
 
+void emitWhileCode(string = "", string = "")
+{
+	string tempLabel = getLabel();
+	emit(operand1 + ":");
+	pushOperand(tempLabel);
+	contentsOfAReg = "";
 }
-// emit code following 'while'
-void Compiler::emitDoCode(string operand1, string operand2)
-{
 
+void emitDoCode(string operand1, string = "")
+{
+	string tempLabel;
+	if (symbolTable.at(operand1).getDataType() != BOOLEAN)
+		processError("while predicate must be of type boolean");
+	tempLabel = getLabel();
+	if (operand1 != contentsOfAReg)
+		emit("", "mov", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; AReg = " + operand1);                           //
+	emit("", "cmp", "eax,0", "; compare eax to 0");
+	emit("", "je", tempLabel, "; if " + tempLabel + " is false then jump to end of if");
+	pushOperand(tempLabel);
+	if (isTemporary(operand1))
+		freeTemp();
+	contentsOfAReg = "";
 }
-// emit code following 'do'
-void Compiler::emitPostWhileCode(string operand1, string operand2)
-// emit code at end of 'while' loop;
-// operand2 is the label of the beginning of the loop
-// operand1 is the label which should follow the end of the loop
-{
 
+void emitPostWhileCode(string operand1, string operand2)
+{
+	emit("", "jmp", operand2, "; unconditionally jump");
+	emit(operand1 + ":");
+	contentsOfAReg = "";
 }
-void Compiler::emitRepeatCode(string operand1, string operand2)
-// emit code which follows 'repeat'
-{
 
+void emitRepeatCode(string = "", string = "")
+{
+	string tempLabel = getLabel();
+	emit(operand1 + ":");
+	pushOperand(tempLabel);
+	contentsOfAReg = "";
 }
-void Compiler::emitUntilCode(string operand1, string operand2)
-// emit code which follows 'until' and the predicate of loop
-// operand1 is the value of the predicate
-// operand2 is the label which points to the beginning of the loop
-{
 
+void emitUntilCode(string operand1, string operand2)
+{
+	if (symbolTable.at(operand1).getDataType() != BOOLEAN)
+		processError("if predicate must be of type boolean");
+	if (operand1 != contentsOfAReg)
+		emit("", "mov", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; AReg = " + operand1);                           //
+	emit("", "cmp", "eax,0", "; compare eax to 0");
+	emit("", "je", operand2, "; if " + operand2 + " is false then jump to end of if");
+	if (isTemporary(operand1))
+		freeTemp();
+	contentsOfAReg = "";
 }
 
 //LEXICAL ROUTINES
