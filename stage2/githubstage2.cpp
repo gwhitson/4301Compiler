@@ -580,7 +580,6 @@ void Compiler::ifStmt()
 	nextToken();
 	if (token == "(")
     {
-        cout << "here" << endl;
         nextToken();
         express();
         if (token != ")")
@@ -597,20 +596,24 @@ void Compiler::ifStmt()
 	
 	nextToken(); 
 	execStmt();
-	nextToken();
+	if (token == ";")
+		nextToken();
 	elsePt();
 }
+
 void Compiler::elsePt()
 {
-	cout << "elsePt: " << endl;
+	cout << "elsePt: " << token << endl;
 	if (token == "else")
 	{	
 		code("else", popOperand());
 		nextToken(); 
 		execStmt();
+		code("post_if", popOperand());
 	}
-	code("post_if", popOperand());
+	
 }
+
 void Compiler::whileStmt()
 {
 	cout << "here" << endl;
@@ -648,6 +651,7 @@ void Compiler::whileStmt()
 	string opand2 = popOperand();					 // gen format code call
 	code("post_while", opand1, opand2);	 // gen format code call post while
 }
+
 void Compiler::repeatStmt()
 {
 	if (token != "repeat")
@@ -672,6 +676,7 @@ void Compiler::repeatStmt()
 	if (token != ";")
 		processError("\';\' expected -- repeat");
 }
+
 void Compiler::nullStmt()
 {
 	if (token != ";")
@@ -1357,8 +1362,8 @@ void Compiler::emitMultiplicationCode(string operand1, string operand2) // op2 *
 		symbolTable.at(contentsOfAReg).setAlloc(YES);                                                                                   //
 		contentsOfAReg = "";                                                                                                            //
 	}                                                                                                                                   //
-	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))                                     //
-       contentsOfAReg = "";                                                                                                             //
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand2))
+		contentsOfAReg = "";                                                                                                           //
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)                                                                       //
 	{                                                                                                                                   //
 		//emit(operand1, symbolTable.at(operand1).getInternalName(), operand2, symbolTable.at(operand2).getInternalName());
@@ -1431,23 +1436,6 @@ void Compiler::emitNegationCode(string operand1, string operand2)           // -
 		emit("","mov","eax,[" + symbolTable.at(operand1).getInternalName() + "]","; AReg = " + operand1);
 	contentsOfAReg = operand1;
 	emit("","neg","eax","; AReg = -AReg");
-	//if (isTemporary(contentsOfAReg) && contentsOfAReg != operand1)
-	//{
-	//	emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
-	//	symbolTable.at(contentsOfAReg).setAlloc(YES);
-	//	contentsOfAReg = "";
-	//}
-	//if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand1)
-	//	contentsOfAReg = "";
-	//if (contentsOfAReg != operand1)
-	//	emit(" ", "mov", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand1);
-	//emit(" ", "neg", "eax", "; negate eax");
-	//
-	//if (isTemporary(contentsOfAReg))
-	//{
-	//	freeTemp();
-	//	contentsOfAReg = "";
-	//}
 
 	if (isTemporary(operand1))
 		freeTemp();
@@ -1465,23 +1453,6 @@ void Compiler::emitNotCode(string operand1, string operand2)                // !
 		emit("","mov","eax,[" + symbolTable.at(operand1).getInternalName() + "]","; AReg = " + operand1);
 	contentsOfAReg = operand1;
 	emit("","not","eax","; AReg = !AReg");
-	//if (isTemporary(contentsOfAReg) && contentsOfAReg != operand1)
-	//{
-	//	emit(" ", "mov", "[" + contentsOfAReg + "], eax", "; deassign eax");
-	//	symbolTable.at(contentsOfAReg).setAlloc(YES);
-	//	contentsOfAReg = "";
-	//}
-	//if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand1)
-	//	contentsOfAReg = "";
-	//if (contentsOfAReg != operand1)
-	//	emit(" ", "mov", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; eax = " + operand1);
-	//emit(" ", "not", "eax", "; negate eax");
-	//
-	//if (isTemporary(contentsOfAReg))
-	//{
-	//	freeTemp();
-	//	contentsOfAReg = "";
-	//}
 
 	if (isTemporary(operand1))
 		freeTemp();
@@ -1503,11 +1474,8 @@ void Compiler::emitAndCode(string operand1, string operand2)            // op2 &
 		contentsOfAReg = "";                                                                                                            //
 	}                                                                                                                                   //
 	//emit(contentsOfAReg);
-	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))                                     //
-	{
-        contentsOfAReg = "";
-		//emit("ran");
-	}
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand2))
+		contentsOfAReg = "";
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)                                                                       //
 	{
 
@@ -1544,14 +1512,10 @@ void Compiler::emitOrCode(string operand1, string operand2)             // op2 |
 		contentsOfAReg = "";                                                                                                            //
 	}                                                                                                                                   //
 	//emit(contentsOfAReg);
-	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand1 && contentsOfAReg != operand2))                                     //
-	{
-        contentsOfAReg = "";
-		//emit("ran");
-	}
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand2))
+		contentsOfAReg = "";
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)                                                                       //
 	{
-
 		emit(" ", "mov", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; AReg = " + operand2);                           //
 		contentsOfAReg = operand2;                                                                                                      //
 	}                                                                                                                                   //
@@ -1586,7 +1550,7 @@ void Compiler::emitEqualityCode(string operand1, string operand2)       // op2 =
 		contentsOfAReg = "";
 	}
 
-	if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand1 && contentsOfAReg != operand2)
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand2))
 		contentsOfAReg = "";
 
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
@@ -1624,53 +1588,6 @@ void Compiler::emitEqualityCode(string operand1, string operand2)       // op2 =
 	contentsOfAReg = getTemp();
 	symbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
 	pushOperand(contentsOfAReg);
-
-	////if (isLiteral(operand1) && isLiteral(operand2)) -- this does nothing
-	//if (whichType(operand1) != whichType(operand2))
-	//	processError("incompatible types");
-	//if (isTemporary(contentsOfAReg) && contentsOfAReg != operand1 && contentsOfAReg != operand2)
-	//{
-	//	emit(" ", "mov", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; eax = " + operand2);	// mov	eax, [operand2's inName]
-   //    symbolTable.at(contentsOfAReg).setAlloc(YES);
-	//	contentsOfAReg = "";
-   //}
-	//if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand1 && contentsOfAReg != operand2)
-	//	contentsOfAReg = "";
-	//if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
-	//	emit("","mov","eax,["+ symbolTable.at(operand2).getInternalName() +"]","; 1AReg = " + operand2);
-	//
-	//emit("","cmp","eax,["+ symbolTable.at(operand1).getInternalName() +"]","; compare");
-	//
-   //string label1 = getLabel();
-   //string label2 = getLabel();
-   //
-	//emit("","je",label1,"; if " + operand2 + '=' + operand1 + " then jump to set eax to TRUE");
-	//emit(" ", "mov", "eax, [FALSE]", "; else mov FALSE into eax");
-	//
-	//if (symbolTable.count("false") == 0)
-	//	symbolTable.insert({"false", SymbolTableEntry("FALSE", BOOLEAN, CONSTANT, "0", YES,1)});
-	//if (symbolTable.count("true") == 0)
-	//	symbolTable.insert({"true", SymbolTableEntry("TRUE", BOOLEAN, CONSTANT, "0", YES,1)});
-	//
-	//if (contentsOfAReg == operand2)
-   //   emit(" ", "cmp", "eax, [" + symbolTable.at(operand1).getInternalName() + "]", "; compare " + operand2 + " and " + operand1);
-   //else
-   //   emit(" ", "cmp", "eax, [" + symbolTable.at(operand2).getInternalName() + "]", "; compare " + operand1 + " and " + operand2);
-   //emit(" ", "je", label1, "; if " + operand2 + " = " + operand1 + " jump and mov TRUE into eax");
-   //emit(" ", "mov", "eax, [FALSE]", "; else mov FALSE into eax");
-	//
-	//emit(" ", "jmp", label2, "; unconditional jump to the next label");
-   //emit(label1 + ":", " ", "; label");
-   //emit(" ", "mov", "eax, [TRUE]", "; mov TRUE into eax");
-   //emit(label2 + ":");
-   //
-	//if (isTemporary(operand1))
-	//	freeTemp();
-	//if (isTemporary(operand2))
-	//	freeTemp();
-   //ontentsOfAReg = getTemp();
-   //ymbolTable.at(contentsOfAReg).setDataType(BOOLEAN);
-   //ushOperand(contentsOfAReg);
 }
 
 void Compiler::emitInequalityCode(string operand1, string operand2)     // op2 != op1
@@ -1800,7 +1717,7 @@ void Compiler::emitLessThanOrEqualToCode(string operand1, string operand2) // op
 		contentsOfAReg = "";
 	}
 
-	if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand1 && contentsOfAReg != operand2)
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand2))
 		contentsOfAReg = "";
 
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
@@ -1855,7 +1772,7 @@ void Compiler::emitGreaterThanCode(string operand1, string operand2)    // op2 >
 		contentsOfAReg = "";
 	}
 
-	if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand1 && contentsOfAReg != operand2)
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand2))
 		contentsOfAReg = "";
 
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
@@ -1910,7 +1827,7 @@ void Compiler::emitGreaterThanOrEqualToCode(string operand1, string operand2) //
 		contentsOfAReg = "";
 	}
 
-	if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand1 && contentsOfAReg != operand2)
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand2))
 		contentsOfAReg = "";
 
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
