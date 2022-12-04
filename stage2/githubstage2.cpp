@@ -13,7 +13,7 @@
 
 //bool insertFalse = false;
 //bool insertTrue = false;
-
+int beginCount = 0;
 int ifcount = 0;
 
 //Constructor
@@ -117,6 +117,7 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 {
 	if (token != "begin")
 		processError("keyword \"begin\" expected -- beginEndStmt");
+	beginCount++;
 	//execStmts();
 	nextToken();
 	//if (token != "end")
@@ -130,7 +131,11 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 			processError("\"end\" expected -- beginEndStmt");
 		}
 	}
+	//cout << "end of Begin End Stmt, token here should be end " << token << endl;
+	beginCount--;
 	nextToken();
+	
+	
 	if (token != "." && token != ";") // does this need to do anything special for stage2? yeah we need to keep track of how many begin stmts we have
 		processError("period expected or semicolon -- beginEndStmt");
 	string temp = token;
@@ -227,18 +232,19 @@ string Compiler::ids() //token should be NON_KEY_ID GTG
 
 void Compiler::execStmts()      // stage 1, production 2
 {
+	//cout << "execStmts " << token << endl;
 	string x, y, z;																		  //useless rn
 	if (token == "read" || token == "write" || isNonKeyId(token) || token == "if" || token == "while" || token == "repeat" || token == ";" || token == "begin")						  //if its read, write, or a non key ID. go into execStmts, otherwise it should do nothing
 	{																					  //
 		execStmt();																		  //
 		//execStmts();			// make this indirectly recursive from execStmt			  //
 	}																					  //
-	if(!isKeyword(token))
+	else
         nextToken();
 }
 void Compiler::execStmt()       // stage 1, production 3								  //
 {																						  //
-	cout<< "execStmt" << endl;
+	//cout<< "execStmt " << token << endl;
 	if (token == "read")																  //if its  a read go to readStmt
 	{																					  //
 		readStmt();																		  //
@@ -253,12 +259,12 @@ void Compiler::execStmt()       // stage 1, production 3								  //
 	}																					  //
 	else if (token == "if")
 	{
+		int prevCount = ifcount;
 		ifcount++;
 		ifStmt();
 		if (ifcount == 0 && token == "else")
 			processError("extra else");
 		
-	}
 	}
 	else if (token == "while")
 	{
@@ -271,6 +277,7 @@ void Compiler::execStmt()       // stage 1, production 3								  //
 	else if (token == ";")
 	{
 		nullStmt();
+		nextToken();
 	}
 	else if (token == "begin")
 	{
@@ -291,14 +298,14 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 			pushOperator(token);
 			nextToken();																  //get next token to send to express                                              // i feel like i need to rewrite this now
 			express();																	  //goes to express? according to motls book on stage1                             // i feel like i need to rewrite this now
-			cout << token << endl;
+			//cout << token << endl;
 			//nextToken();																  //get next token again, this time we want a semicolon                            // i feel like i need to rewrite this now
 			if (token != ";")															  //                                                                               // i feel like i need to rewrite this now
 				processError("Semicolon expected -- assign stmt");						  //if theres no semicolon it throws an error                                      // i feel like i need to rewrite this now
 		}																				  //                                                                               // i feel like i need to rewrite this now
 		else
 			processError("\':=\' expected in assign stmt");
-		cout<< "assignStmt pops" << endl;
+		//cout<< "assignStmt pops" << endl;
 		string opand1, opand2;
 		opand1 = popOperand();
 		opand2 = popOperand();
@@ -353,7 +360,7 @@ void Compiler::writeStmt()      // stage 1, production 7, 8's code is included h
 }
 void Compiler::express()        // stage 1, production 9
 {                                                                                                                         //these will probably be heavy on the stack shit
-	cout<< "express" << endl;
+	//cout<< "express" << endl;
 	//takes in some token -- prodcutions calling this should call nextToken before this production                        //these will probably be heavy on the stack shit
 	term();                                                                                                               //these will probably be heavy on the stack shit
 	expresses();
@@ -367,9 +374,9 @@ void Compiler::expresses()      // stage 1, production 10
 		string opand1, opand2, oper;
 		pushOperator(token);
 		nextToken();
-		cout<< " this next token call was in expresses" << endl;
+		//cout<< " this next token call was in expresses" << endl;
 		term();
-		cout<< "expresses pops" << endl;
+		//cout<< "expresses pops" << endl;
 		opand1 = popOperand();
 		opand2 = popOperand();
 		oper = popOperator();
@@ -394,7 +401,7 @@ void Compiler::term()           // stage 1, production 11
 	//assuming this also takes in some token grabbed by previous production
 	factor();
 	//nextToken();
-	cout<< "nextToken in term" << endl;
+	//cout<< "nextToken in term" << endl;
 	terms();
 
 	//cout<< "term close with " << token << endl;
@@ -410,10 +417,10 @@ void Compiler::terms()          // stage 1, production 12
 		nextToken(); //???
 		factor();
 
-		cout<< "terms pops" << endl;
+		//cout<< "terms pops" << endl;
 		opand1 = popOperand();					 // gen format code call
 		opand2 = popOperand();					 // gen format code call
-		cout<< "opand1 = " << opand1 << "     opand2 = " << opand2 << endl;
+		//cout<< "opand1 = " << opand1 << "     opand2 = " << opand2 << endl;
 		code(popOperator(), opand1, opand2);	 // gen format code call
 
 		terms();
@@ -442,10 +449,10 @@ void Compiler::factors()        // stage 1, production 14
 		part();
 
 
-		cout<< "factors pops" << endl;
+		//cout<< "factors pops" << endl;
 		opand1 = popOperand();					 // gen format code call
 		opand2 = popOperand();					 // gen format code call
-		cout<< opand1 << temp << opand2 << " -------------- test" << endl;
+		//cout<< opand1 << temp << opand2 << " -------------- test" << endl;
 		code(popOperator(), opand1, opand2);	 // gen format code call
 
 		factors();
@@ -457,7 +464,7 @@ void Compiler::part()           // stage 1, production 15
 	//cout<< "part" << endl;
 	if (token == "not")                                                                                                                            //   NOT SECTION
 	{                                                                                                                                              //
-	cout << "not" << endl;
+	//cout << "not" << endl;
 		nextToken();                                                                                                                               //
 		if (token == "(")                                                                                                                          //
 		{                                                                                                                                          //
@@ -584,6 +591,7 @@ void Compiler::ifStmt()
 {
 	if (token != "if")
 		processError("\"if\" expected inside if statement");
+	cout <<"if - " << token << endl;
 	nextToken();
 	if (token == "(")
     {
@@ -596,35 +604,53 @@ void Compiler::ifStmt()
 	else
         express();
 	
+	cout <<"expression - " << token << endl;
+	
 	if (token != "then")
 		processError("\"then\" expected inside if statement");
+	cout <<"then - " << token << endl;
 	
 	code(token,popOperand());
 	
 	nextToken(); 
+	cout <<"exec statment - " << token << endl;
 	execStmt();
+	
+	cout <<"token here should be either end, final part of exec, or next exec statment? - " << token << endl;
 	if (token == ";")
 		nextToken();
 	elsePt();
+	cout << ifcount << endl;
 }
 
 void Compiler::elsePt()
 {
-	cout << "elsePt: " << token << endl;
-	if (token == "else")
+	cout << "elsePt: " << token  << " if count = " << ifcount << endl;
+	//if (token == ";")
+	//	nextToken();
+	
+	if (token == "end" || token == ";" || isNonKeyId(token) || token == "until" || token == "begin" || token == "while" || token == "if" || token == "repeat" || token == "read" || token == "write")
+	{
+		cout << "empty else" << endl;
+		code("post_if", popOperand());
+	}
+	else if (token == "else" && ifcount >= 1)
 	{	
+		cout << " inside else - " << token << endl;
 		code("else", popOperand());
 		nextToken(); 
 		execStmt();
 		code("post_if", popOperand());
+		nextToken();
 	}
+	cout << "end of else, token should be ;? - " << token << endl;
 	ifcount--;
 	
 }
 
 void Compiler::whileStmt()
 {
-	cout << "here" << endl;
+	//cout << "here" << endl;
 	if (token != "while")
 		processError("\"while\" expected in while stmt");
 	
@@ -634,7 +660,7 @@ void Compiler::whileStmt()
 	
 	if (token == "(")                                                                                                                   
 	{
-		cout << "here" << endl;
+		//cout << "here" << endl;
 		nextToken();
 		express();
 		if (token != ")")                                                  
@@ -644,7 +670,7 @@ void Compiler::whileStmt()
 	else
 		express();
 	
-	cout << "there  -- token = " << token << endl;
+	//cout << "there  -- token = " << token << endl;
 	
 	
 	if (token != "do")
@@ -891,7 +917,7 @@ string Compiler::whichValue(string name) //tells which value a name has
 
 void Compiler::code(string op, string operand1, string operand2)
 {
-	cout<< "code::::::::: operator = " << op << "   operand1 = " << operand1 << "   operand2 = " << operand2 << endl;
+	//cout<< "code::::::::: operator = " << op << "   operand1 = " << operand1 << "   operand2 = " << operand2 << endl;
 	//emit(op);
 	if (op == "program")
 		emitPrologue(operand1);
@@ -1001,7 +1027,7 @@ void Compiler::pushOperand(string operand)
 	//}
 
 
-	cout<< "pushOperand: " << operand << endl;
+	//cout<< "pushOperand: " << operand << endl;
 	operandStk.push(operand);
 }
 
@@ -2072,7 +2098,7 @@ string Compiler::nextToken() // GTG
 		}
 	}
 	token = token.substr(0, 15);
-	cout<< "token = " << token << "    -- nextToken" << endl;
+	//cout<< "token = " << token << "    -- nextToken" << endl;
 	return token;
 }
 //OTHER ROUTINES
