@@ -33,7 +33,7 @@ Compiler::~Compiler() // destructor GTG
 void Compiler::createListingHeader() // GTG
 {
 	time_t now = time(NULL);
-	listingFile << "STAGE0:  " << "Joshua Strickland & Gavin Whitson\t" << ctime(&now) << endl;
+	listingFile << "STAGE2:  " << "Joshua Strickland & Gavin Whitson\t" << ctime(&now) << endl;
 	listingFile << "LINE NO." << setw(30) << "SOURCE STATEMENT" << endl;
 }
 
@@ -122,7 +122,7 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 	while (token != "end" /*|| token.at(0) != END_OF_FILE || token != "."*/)
 	{
 		execStmts();
-		nextToken();
+		//nextToken();
 		if (token[0] == END_OF_FILE)
 		{
 			processError("\"end\" expected -- beginEndStmt");
@@ -231,7 +231,8 @@ void Compiler::execStmts()      // stage 1, production 2
 		execStmt();																		  //
 		//execStmts();			// make this indirectly recursive from execStmt			  //
 	}																					  //
-
+	if(!isKeyword(token))
+        nextToken();
 }
 void Compiler::execStmt()       // stage 1, production 3								  //
 {																						  //
@@ -577,7 +578,17 @@ void Compiler::ifStmt()
 	if (token != "if")
 		processError("\"if\" expected inside if statement");
 	nextToken();
-	express();
+	if (token == "(")
+    {
+        cout << "here" << endl;
+        nextToken();
+        express();
+        if (token != ")")
+            processError("')' expected -- part ugh .. this is the not section");
+        nextToken();
+    }
+	else
+        express();
 	
 	if (token != "then")
 		processError("\"then\" expected inside if statement");
@@ -586,17 +597,19 @@ void Compiler::ifStmt()
 	
 	nextToken(); 
 	execStmt();
-	
+	nextToken();
 	elsePt();
 }
 void Compiler::elsePt()
 {
+	cout << "elsePt: " << endl;
 	if (token == "else")
-	{		
+	{	
+		code("else", popOperand());
 		nextToken(); 
 		execStmt();
-		code("post_if", popOperand());
 	}
+	code("post_if", popOperand());
 }
 void Compiler::whileStmt()
 {
@@ -644,6 +657,7 @@ void Compiler::repeatStmt()
 	
 	nextToken();
 	execStmt();
+	nextToken();
 	
 	if (token != "until")
 		processError("\"until\" expected in repeat stmt");
@@ -912,6 +926,8 @@ void Compiler::code(string op, string operand1, string operand2)
 		emitPostIfCode(operand1, operand2);
 	else if (op == "then")
 		emitThenCode(operand1, operand2);
+	else if (op == "else")
+		emitElseCode(operand1, operand2);
 	else if (op == "while")
 		emitWhileCode(operand1, operand2);
 	else if (op == "do")
@@ -1728,7 +1744,7 @@ void Compiler::emitLessThanCode(string operand1, string operand2)       // op2 <
 		contentsOfAReg = "";
 	}
 
-	if (!isTemporary(contentsOfAReg) && contentsOfAReg != operand1 && contentsOfAReg != operand2)
+	if (!isTemporary(contentsOfAReg) && (contentsOfAReg != operand2))
 		contentsOfAReg = "";
 
 	if (contentsOfAReg != operand1 && contentsOfAReg != operand2)
@@ -1852,9 +1868,9 @@ void Compiler::emitGreaterThanCode(string operand1, string operand2)    // op2 >
 	string currentLabel = getLabel();
 
 	if (contentsOfAReg == operand2)
-		emit("", "cmp", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; compare " + operand2 + " and " + operand1);
-	else
 		emit("", "cmp", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; compare " + operand1 + " and " + operand2);
+	else
+		emit("", "cmp", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; compare " + operand2 + " and " + operand1);
 
 	emit("", "jg", prevLabel, "; if " + operand2 + " > " + operand1 + " then jump to set eax to TRUE");
 	emit("", "mov", "eax,[FALSE]", "; else set eax to FALSE");
