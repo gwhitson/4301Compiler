@@ -1793,9 +1793,9 @@ void Compiler::emitGreaterThanCode(string operand1, string operand2)    // op2 >
 	string currentLabel = getLabel();
 
 	if (contentsOfAReg == operand2)
-		emit("", "cmp", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; compare " + operand1 + " and " + operand2);
-	else
 		emit("", "cmp", "eax,[" + symbolTable.at(operand1).getInternalName() + "]", "; compare " + operand2 + " and " + operand1);
+	else
+		emit("", "cmp", "eax,[" + symbolTable.at(operand2).getInternalName() + "]", "; compare " + operand1 + " and " + operand2);
 
 	emit("", "jg", prevLabel, "; if " + operand2 + " > " + operand1 + " then jump to set eax to TRUE");
 	emit("", "mov", "eax,[FALSE]", "; else set eax to FALSE");
