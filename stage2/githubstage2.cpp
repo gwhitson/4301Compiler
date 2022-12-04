@@ -14,6 +14,8 @@
 //bool insertFalse = false;
 //bool insertTrue = false;
 
+int ifcount = 0;
+
 //Constructor
 Compiler::Compiler(char** argv) // GTG
 {
@@ -251,7 +253,12 @@ void Compiler::execStmt()       // stage 1, production 3								  //
 	}																					  //
 	else if (token == "if")
 	{
+		ifcount++;
 		ifStmt();
+		if (ifcount == 0 && token == "else")
+			processError("extra else");
+		
+	}
 	}
 	else if (token == "while")
 	{
@@ -611,6 +618,7 @@ void Compiler::elsePt()
 		execStmt();
 		code("post_if", popOperand());
 	}
+	ifcount--;
 	
 }
 
