@@ -63,7 +63,7 @@ void Compiler::createListingTrailer() // GTG
 void Compiler::prog()	// token should be "program" GTG
 {
 	if (token != "program")
-		processError("keyword \"program\" expected -- prog");
+		processError("keyword \"program\" expected");
 	progStmt();
 	if (token == "const")
 	{
@@ -74,22 +74,22 @@ void Compiler::prog()	// token should be "program" GTG
 	if (token == "var")
 		vars();
 	if (token != "begin")
-		processError("keyword \"begin\" expected -- prog");
+		processError("keyword \"begin\" expected");
 	beginEndStmt();
 	if (token != "$")
-		processError("no text may follow \"end\" -- prog");
+		processError("no text may follow \"end\"");
 }
 
 void Compiler::progStmt() //token should be "program" GTG
 {
 	string x;
 	if (token != "program")
-		processError("keyword \"program\" expected -- progStmt");
+		processError("keyword \"program\" expected");
 	x = nextToken();
 	if (!isNonKeyId(token))
-		processError("program name expected -- progStmt");
+		processError("program name expected");
 	if (nextToken() != ";")
-		processError("semicolon expected -- progStmt");
+		processError("semicolon expected");
 	nextToken();
 	code("program", x);
 	insert(x, PROG_NAME, CONSTANT, x, NO, 0);
@@ -98,25 +98,25 @@ void Compiler::progStmt() //token should be "program" GTG
 void Compiler::consts() //token should be "const" GTG
 {
 	if (token != "const")
-		processError("keyword \"const\" expected -- consts");
+		processError("keyword \"const\" expected");
 	if (!isNonKeyId(nextToken()))
-		processError("non-keyword identifier must follow \"const\" -- consts");
+		processError("non-keyword identifier must follow \"const\"");
 	constStmts();
 }
 
 void Compiler::vars() //token should be "var" GTG
 {
 	if (token != "var")
-		processError("keyword \"var\" expected -- var");
+		processError("keyword \"var\" expected");
 	if (!isNonKeyId(nextToken()))
-		processError("non-keyword identifier must follow \"var\" -- var");
+		processError("non-keyword identifier must follow \"var\"");
 	varStmts();
 }
 
 void Compiler::beginEndStmt() //token should be "begin" GTG
 {
 	if (token != "begin")
-		processError("keyword \"begin\" expected -- beginEndStmt");
+		processError("keyword \"begin\" expected");
 	beginCount++;
 	//execStmts();
 	nextToken();
@@ -128,16 +128,16 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 		//nextToken();
 		if (token[0] == END_OF_FILE)
 		{
-			processError("\"end\" expected -- beginEndStmt");
+			processError("\"end\" expected");
 		}
 	}
-	cout << "end of Begin End Stmt - " << token << endl;
+	//cout << "end of Begin End Stmt - " << token << endl;
 	beginCount--;
 	nextToken();
 	
 	
 	if (token != "." && token != ";") // does this need to do anything special for stage2? yeah we need to keep track of how many begin stmts we have
-		processError("period expected or semicolon -- beginEndStmt");
+		processError("period expected or semicolon");
 	string temp = token;
 	nextToken();
 	//code("end", temp);
@@ -150,17 +150,17 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 	//cout<< "constStmts token - " << token << endl;
 	string x, y, z;
 	if (!isNonKeyId(token))
-		processError("non-keyword identifier expected -- constStmts");
+		processError("non-keyword identifier expected");
 	x = token;
 	if (nextToken() != "=")
 		processError("\"=\" expected");
 	y = nextToken();
 	if (y != "+" && y != "-" && y != "not" && !isNonKeyId(y) && !isBoolean(y) && !isInteger(y))
-		processError("token to right of \"=\" illegal -- constStmts");
+		processError("token to right of \"=\" illegal");
 	if (y == "+" || y == "-")
 	{
 		if (!isInteger(nextToken()))
-			processError("digit expected after sign -- constStmts");
+			processError("digit expected after sign");
 		y = y + token;
 	}
 	if (y == "not")
@@ -168,7 +168,7 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 		z = nextToken();
 		if (!isBoolean(z) && whichType(z) != BOOLEAN)
 		{
-			processError("boolean expected after “not” -- constStmts");
+			processError("boolean expected after “not”");
 		}
 		//cout<< "past check     token z = " << z  << "   token y = " << y<< endl;
 		if (token == "true" || whichValue(z) == "true")
@@ -178,16 +178,16 @@ void Compiler::constStmts() //token should be NON_KEY_ID GTG
 		//cout<< "past replace value" << endl;
 	}
 	if (nextToken() != ";")
-		processError("semicolon expected -- constStmts");
+		processError("semicolon expected");
 	if (whichType(y) != INTEGER && whichType(y) != BOOLEAN)
 	{
-		processError("data type of token on the right-hand side must be INTEGER or BOOLEAN -- constStmts");
+		processError("data type of token on the right-hand side must be INTEGER or BOOLEAN");
 	}
 
 	insert(x, whichType(y), CONSTANT, whichValue(y), YES, 1);
 	x = nextToken();
 	if (x != "begin" && x != "var" && !isNonKeyId(x))
-		processError("non-keyword identifier, \"begin\", or \"var\" expected -- constStmts");
+		processError("non-keyword identifier, \"begin\", or \"var\" expected");
 	if (isNonKeyId(x))
 		constStmts();
 }
@@ -196,20 +196,20 @@ void Compiler::varStmts() // GTG
 {
 	string x, y, z;
 	if (!isNonKeyId(token))
-		processError("non-keyword identifier expected -- varStmts");
+		processError("non-keyword identifier expected");
 	x = ids();
 	if (token != ":")
 		processError("\":\" expected");
 	z = nextToken();
 	if (z != "integer" && z != "boolean")
-		processError("illegal type follows \":\" -- varStmts");
+		processError("illegal type follows \":\"");
 	y = token;
 	if (nextToken() != ";")
 		processError("semicolon expected -- varStmts");
 	insert(x, whichType(y), VARIABLE, "", YES, 1);
 	z = nextToken();
 	if (!isNonKeyId(z) && z != "begin")
-		processError("non-keyword identifier or \"begin\" expected -- varStmts");
+		processError("non-keyword identifier or \"begin\" expected");
 	if (isNonKeyId(token))
 		varStmts();
 }
@@ -218,13 +218,13 @@ string Compiler::ids() //token should be NON_KEY_ID GTG
 {
 	string temp, tempString;
 	if (!isNonKeyId(token))
-		processError("non-keyword identifier expected -- ids");
+		processError("non-keyword identifier expected");
 	tempString = token;
 	temp = token;
 	if (nextToken() == ",")
 	{
 		if (!isNonKeyId(nextToken()))
-			processError("non-keyword identifier expected -- ids");
+			processError("non-keyword identifier expected");
 		tempString = temp + "," + ids();
 	}
 	return tempString;
@@ -232,7 +232,7 @@ string Compiler::ids() //token should be NON_KEY_ID GTG
 
 void Compiler::execStmts()      // stage 1, production 2
 {
-	cout << "execStmts " << token << endl;
+	//cout << "execStmts " << token << endl;
 	string x, y, z;																		  //useless rn
 	if (token == "read" || token == "write" || isNonKeyId(token) || token == "if" || token == "while" || token == "repeat" || token == ";" || token == "begin")						  //if its read, write, or a non key ID. go into execStmts, otherwise it should do nothing
 	{																					  //
@@ -244,7 +244,7 @@ void Compiler::execStmts()      // stage 1, production 2
 }
 void Compiler::execStmt()       // stage 1, production 3								  //
 {																						  //
-	cout<< "execStmt " << token << endl;
+	//cout<< "execStmt " << token << endl;
 	if (token == "read")																  //if its  a read go to readStmt
 	{																					  //
 		readStmt();																		  //
@@ -284,7 +284,7 @@ void Compiler::execStmt()       // stage 1, production 3								  //
 		beginEndStmt();
 	}
 	else
-		processError("not a valid exec stmt -- exec stmt");
+		processError("not a valid exec stmt");
 }
 void Compiler::assignStmt()     // stage 1, production 4								  //
 {																						  //                                                                               // i feel like i need to rewrite this now
@@ -301,7 +301,7 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 			//cout << token << endl;
 			//nextToken();																  //get next token again, this time we want a semicolon                            // i feel like i need to rewrite this now
 			if (token != ";")															  //                                                                               // i feel like i need to rewrite this now
-				processError("Semicolon expected -- assign stmt");						  //if theres no semicolon it throws an error                                      // i feel like i need to rewrite this now
+				processError("Semicolon expected ");						  //if theres no semicolon it throws an error                                      // i feel like i need to rewrite this now
 		}																				  //                                                                               // i feel like i need to rewrite this now
 		else
 			processError("\':=\' expected in assign stmt");
@@ -316,7 +316,7 @@ void Compiler::assignStmt()     // stage 1, production 4								  //
 
 	}                                                                                                                                                                      // i feel like i need to rewrite this now
 	else                                                                                                                                                                   // i feel like i need to rewrite this now
-		processError("how did you get here? -- assignStmt");                                                                                                               // i feel like i need to rewrite this now
+		processError("how did you get here?");                                                                                                               // i feel like i need to rewrite this now
 
 	//cout<< "assignStmt close" << endl;
 }
@@ -324,38 +324,38 @@ void Compiler::readStmt()       // stage 1, production 5, production 6 (readList
 {
 	//cout<< "readStmt" << endl;
 	if (token != "read")                                                                  //
-		processError("read expected -- readStmt");                                        //hella redundant
+		processError("read expected");                                        //hella redundant
 	nextToken();                                                                          //
 	if (token != "(")                                                                     //should be the start of the ids
-		processError("\'(\' expected -- readStmt");                                       //
+		processError("\'(\' expected");                                       //
 	nextToken();
 	string tempIds = ids();                                                               //uhhhh were going to need to do something with this but im getting the stucture in now
 																						  //ids seems to stop when nextToken finds something that is not a , after the word; idea is it should be the ) at this point
 	if (token != ")")                                                                     //should be end of the ids part
-		processError("\')\' expected -- readStmt");                                       //
+		processError("\')\' expected");                                       //
 	code("read", tempIds);
 	nextToken();                                                                          //
 	if (token != ";")                                                                     //semicolon at the end of this part
-		processError("\';\' expected -- readStmt");                                       //
+		processError("\';\' expected");                                       //
 	//cout<< "readStmt close" << endl;
 }
 void Compiler::writeStmt()      // stage 1, production 7, 8's code is included here
 {
 	//cout<< "writeStmt" << endl;
 	if (token != "write")
-		processError("write expected -- writeStmt");                                      // these seem the exact same...
+		processError("write expected");                                      // these seem the exact same...
 	nextToken();                                                                          // these seem the exact same...
 	if (token != "(")                                                                     // these seem the exact same...
-		processError("\'(\' expected -- writeStmt");                                      // these seem the exact same...
+		processError("\'(\' expected");                                      // these seem the exact same...
 	nextToken();
 	string tempIds = ids();                                                               // these seem the exact same...
 																						  // these seem the exact same...
 	if (token != ")")                                                                     // these seem the exact same...
-		processError("\')\' expected -- writeStmt");                                      // these seem the exact same...
+		processError("\')\' expected");                                      // these seem the exact same...
 	code("write", tempIds);
 	nextToken();                                                                          // these seem the exact same...
 	if (token != ";")                                                                     // these seem the exact same...
-		processError("\';\' expected -- writeStmt");                                      // these seem the exact same...
+		processError("\';\' expected");                                      // these seem the exact same...
 	//cout<< "writeStmt close with" << token << endl;
 }
 void Compiler::express()        // stage 1, production 9
@@ -472,7 +472,7 @@ void Compiler::part()           // stage 1, production 15
 			express();                                                                                                                             //
 			//nextToken();                                                                                                                           //
 			if (token != ")")                                                                                                                      //
-				processError("\')\' expected -- part ugh .. this is the not section");                                                             //
+				processError("\')\' expected");                                                             //
 			code("not", popOperand());                                                                                                             //
 			nextToken();
 		}                                                                                                                                          //
@@ -488,13 +488,13 @@ void Compiler::part()           // stage 1, production 15
 		{                                                                                                                                          //
 			if (whichType(token) != BOOLEAN)                                                                                                       //
 			{                                                                                                                                      //
-				processError("symbol of type BOOLEAN expected -- part (not, isNonKeyID)");                                                         //
+				processError("symbol of type BOOLEAN expected");                                                         //
 			}                                                                                                                                      //
 			code("not", token);                                                                                                                    //
 			nextToken();
 		}                                                                                                                                          //
 		else                                                                                                                                       //
-			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean -- part (not)");                      //
+			processError("We either needed a boolean, boolean value, or an expresssion equating to a boolean");                      //
 	}                                                                                                                                              //
 	else if (token == "+")                                                                                                                         //   + SECTION
 	{                                                                                                                                              //
@@ -505,7 +505,7 @@ void Compiler::part()           // stage 1, production 15
 			express();                                                                                                                             //
 			//nextToken();                                                                                                                           //
 			if (token != ")")                                                                                                                      //
-				processError("\')\' expected -- part ugh .. this is the + section");                                                               //
+				processError("\')\' expected");                                                               //
 			nextToken();
 		}                                                                                                                                          //
 		else if (token == "-")
@@ -528,7 +528,7 @@ void Compiler::part()           // stage 1, production 15
 			nextToken();
 		}                                                                                                                                          //
 		else                                                                                                                                       //
-			processError("We either needed a integer, integer value, or an expresssion equating to a integer -- part (+)");                        //
+			processError("We either needed a integer, integer value, or an expresssion equating to a integer");                        //
 	}                                                                                                                                              //
 	else if (token == "-")                                                                                                                         //   - SECTION
 	{                                                                                                                                              //
@@ -540,7 +540,7 @@ void Compiler::part()           // stage 1, production 15
 			//nextToken();                                                                                                                           //
 			//emit(token, token, token, token);
 			if (token != ")")                                                                                                                      //
-				processError("\')\' expected -- part ugh .. this is the - section");                                                               //
+				processError("\')\' expected");                                                               //
 			code("neg", popOperand());
 			nextToken();
 		}                                                                                                                                          //
@@ -555,7 +555,7 @@ void Compiler::part()           // stage 1, production 15
 			nextToken();
 		}                                                                                                                                          //
 		else                                                                                                                                       //
-			processError("We either needed a integer, integer value, or an expresssion equating to a integer -- part (-)");                        //
+			processError("We either needed a integer, integer value, or an expresssion equating to a integer");                        //
 	}                                                                                                                                              //
 	else if (token == "(") // another expression                                                                                                   //   SECOND EXPRESSION SECTION
 	{                                                                                                                                              //
@@ -563,7 +563,7 @@ void Compiler::part()           // stage 1, production 15
 		express();                                                                                                                                 //
 		//nextToken();                                                                                                                               //
 		if (token != ")")                                                                                                                          //
-			processError("\')\' expected -- part(expression)");                                                                                    //
+			processError("\')\' expected");                                                                                    //
 		nextToken();
 	}                                                                                                                                              //
 	else if (isInteger(token))                                                                                                                     //  PURE INT SECTION
@@ -582,7 +582,7 @@ void Compiler::part()           // stage 1, production 15
 			nextToken();
 	}                                                                                                                                              //
 	else                                                                                                                                           //
-		processError("fail in part");                                                                                                              //
+		processError("\'not\', \'+\', \'-\',\'(\', integer, boolean, or nonKeyID expected");                                                                                                              //
 
 	//cout<< "part found: " << token << " -- part closed"<< endl;
 }
@@ -597,7 +597,7 @@ void Compiler::ifStmt()
         nextToken();
         express();
         if (token != ")")
-            processError("')' expected -- part ugh .. this is the not section");
+            processError("')' expected");
         nextToken();
     }
 	else
@@ -619,7 +619,7 @@ void Compiler::ifStmt()
 
 void Compiler::elsePt()
 {
-	cout << "elsePt - " << token << endl; 
+	//cout << "elsePt - " << token << endl; 
 	if (token == ";")
 		nextToken();
 	if (token == "end" || token == ";" || isNonKeyId(token) || token == "until" || token == "begin" || token == "while" || token == "if" || token == "repeat" || token == "read" || token == "write")
@@ -635,7 +635,7 @@ void Compiler::elsePt()
 		//nextToken();
 	}
 	ifcount--;
-	cout << "elsePt end - " << token << endl; 
+	//cout << "elsePt end - " << token << endl; 
 	
 }
 
@@ -655,7 +655,7 @@ void Compiler::whileStmt()
 		nextToken();
 		express();
 		if (token != ")")                                                  
-			processError("\')\' expected -- part ugh .. this is the not section");
+			processError("\')\' expected");
 		nextToken();
 	}
 	else
@@ -704,13 +704,13 @@ void Compiler::repeatStmt()
 	code("until", opand1, opand2);	 // gen format code call post while
 	
 	if (token != ";")
-		processError("\';\' expected -- repeat");
+		processError("\';\' expected");
 }
 
 void Compiler::nullStmt()
 {
 	if (token != ";")
-		processError("\';\' expected -- null");
+		processError("\';\' expected");
 }
 
 //HELPER FUNCTIONS
@@ -1443,11 +1443,11 @@ void Compiler::emitModuloCode(string operand1, string operand2)         // op2 %
 	else
 		emit(" ", "idiv", "dword [" + symbolTable.at(operand2).getInternalName() + "]", "; AReg = " + operand1 + " div " + operand2);
 	emit("", "xchg", "eax,edx", "; exchange quotient and remainder");
-	if (isTemporary(contentsOfAReg))
-	{
-		freeTemp();
-		contentsOfAReg = "";
-	}
+	//if (isTemporary(contentsOfAReg))
+	//{
+	//	freeTemp();
+	//	contentsOfAReg = "";
+	//}
 	if (isTemporary(operand1) && contentsOfAReg != operand1)
 		freeTemp();
 	if (isTemporary(operand2) && contentsOfAReg != operand2)
@@ -2132,7 +2132,7 @@ void Compiler::processError(string err) // GTG
 {
 	listingFile << endl << "Error: Line " << lineNo << ": " << err  << "\n\n\ntoken = " << token<< endl << endl;
 	errorCount++;
-	cout<< endl << "Error: Line " << lineNo << ": " << err << endl << endl;	// debug
+	//cout<< endl << "Error: Line " << lineNo << ": " << err << endl << endl;	// debug
 
 	//cout<< "opandstk size = " << operandStk.size() << endl;
 	//for (uint i = 0 ; i < operandStk.size(); i++)
