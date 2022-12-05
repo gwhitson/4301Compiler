@@ -131,7 +131,7 @@ void Compiler::beginEndStmt() //token should be "begin" GTG
 			processError("\"end\" expected -- beginEndStmt");
 		}
 	}
-	//cout << "end of Begin End Stmt, token here should be end " << token << endl;
+	cout << "end of Begin End Stmt - " << token << endl;
 	beginCount--;
 	nextToken();
 	
@@ -232,7 +232,7 @@ string Compiler::ids() //token should be NON_KEY_ID GTG
 
 void Compiler::execStmts()      // stage 1, production 2
 {
-	//cout << "execStmts " << token << endl;
+	cout << "execStmts " << token << endl;
 	string x, y, z;																		  //useless rn
 	if (token == "read" || token == "write" || isNonKeyId(token) || token == "if" || token == "while" || token == "repeat" || token == ";" || token == "begin")						  //if its read, write, or a non key ID. go into execStmts, otherwise it should do nothing
 	{																					  //
@@ -244,7 +244,7 @@ void Compiler::execStmts()      // stage 1, production 2
 }
 void Compiler::execStmt()       // stage 1, production 3								  //
 {																						  //
-	//cout<< "execStmt " << token << endl;
+	cout<< "execStmt " << token << endl;
 	if (token == "read")																  //if its  a read go to readStmt
 	{																					  //
 		readStmt();																		  //
@@ -619,6 +619,9 @@ void Compiler::ifStmt()
 
 void Compiler::elsePt()
 {
+	cout << "elsePt - " << token << endl; 
+	if (token == ";")
+		nextToken();
 	if (token == "end" || token == ";" || isNonKeyId(token) || token == "until" || token == "begin" || token == "while" || token == "if" || token == "repeat" || token == "read" || token == "write")
 	{
 		code("post_if", popOperand());
@@ -629,9 +632,10 @@ void Compiler::elsePt()
 		nextToken(); 
 		execStmt();
 		code("post_if", popOperand());
-		nextToken();
+		//nextToken();
 	}
 	ifcount--;
+	cout << "elsePt end - " << token << endl; 
 	
 }
 
@@ -1998,7 +2002,8 @@ char Compiler::nextChar()  //GTG
 		lineNo++;
 		listingFile << endl << right << setw(5) << lineNo << "|";
 	}
-
+	
+	//cout << ch << endl;
 	listingFile << ch;
 	return ch;
 }
@@ -2029,6 +2034,7 @@ string Compiler::nextToken() // GTG
 				processError("unexpected end of file -- nextToken");
 			else
 				nextChar();
+			//cout << " here " << endl;
 		}
 
 		else if (ch == '}')						// case '}'
@@ -2057,8 +2063,10 @@ string Compiler::nextToken() // GTG
 			while (((isdigit(x)) || (islower(x)) || x == '_') && x != END_OF_FILE)
 			{
 				//cout<< "token in progress -- " << token  << "    x = " << x<< endl;
-				if (isKeyword(token) && isalpha(x))
+				if (isKeyword(token) && isspace(x))
+				{
 					return token;
+				}
 				token += x;
 				x = nextChar();
 			}
@@ -2122,7 +2130,7 @@ string Compiler::genInternalName(storeTypes stype) const //GTG
 
 void Compiler::processError(string err) // GTG
 {
-	listingFile << endl << "Error: Line " << lineNo << ": " << err  << "\n\n\\ntoken = " << token<< endl << endl;
+	listingFile << endl << "Error: Line " << lineNo << ": " << err  << "\n\n\ntoken = " << token<< endl << endl;
 	errorCount++;
 	cout<< endl << "Error: Line " << lineNo << ": " << err << endl << endl;	// debug
 
