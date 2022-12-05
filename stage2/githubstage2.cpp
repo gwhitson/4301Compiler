@@ -259,7 +259,7 @@ void Compiler::execStmt()       // stage 1, production 3								  //
 	}																					  //
 	else if (token == "if")
 	{
-		int prevCount = ifcount;
+		//int prevCount = ifcount;
 		ifcount++;
 		ifStmt();
 		if (ifcount == 0 && token == "else")
@@ -591,7 +591,6 @@ void Compiler::ifStmt()
 {
 	if (token != "if")
 		processError("\"if\" expected inside if statement");
-	cout <<"if - " << token << endl;
 	nextToken();
 	if (token == "(")
     {
@@ -604,46 +603,34 @@ void Compiler::ifStmt()
 	else
         express();
 	
-	cout <<"expression - " << token << endl;
 	
 	if (token != "then")
 		processError("\"then\" expected inside if statement");
-	cout <<"then - " << token << endl;
 	
 	code(token,popOperand());
 	
 	nextToken(); 
-	cout <<"exec statment - " << token << endl;
 	execStmt();
 	
-	cout <<"token here should be either end, final part of exec, or next exec statment? - " << token << endl;
 	if (token == ";")
 		nextToken();
 	elsePt();
-	cout << ifcount << endl;
 }
 
 void Compiler::elsePt()
 {
-	cout << "elsePt: " << token  << " if count = " << ifcount << endl;
-	//if (token == ";")
-	//	nextToken();
-	
 	if (token == "end" || token == ";" || isNonKeyId(token) || token == "until" || token == "begin" || token == "while" || token == "if" || token == "repeat" || token == "read" || token == "write")
 	{
-		cout << "empty else" << endl;
 		code("post_if", popOperand());
 	}
 	else if (token == "else" && ifcount >= 1)
 	{	
-		cout << " inside else - " << token << endl;
 		code("else", popOperand());
 		nextToken(); 
 		execStmt();
 		code("post_if", popOperand());
 		nextToken();
 	}
-	cout << "end of else, token should be ;? - " << token << endl;
 	ifcount--;
 	
 }
@@ -694,11 +681,16 @@ void Compiler::repeatStmt()
 	code("repeat");
 	
 	nextToken();
-	execStmt();
-	nextToken();
 	
-	if (token != "until")
-		processError("\"until\" expected in repeat stmt");
+	while (token != "until")
+	{
+		if (token[0] == END_OF_FILE)
+			processError("\"until\" expected in repeat stmt");
+		execStmt();
+		nextToken();
+	
+	}
+	
 	
 	nextToken();
 	express();
